@@ -1,0 +1,24 @@
+{
+  "設備・アメニティ": {
+    "Wi-Fi": false,
+    "電源サイト": false,
+    "直火OK": false,
+    "焚き火台OK": false,
+    "炊事場": false,
+    "トイレ": false,
+    "シャワー": false,
+    "温泉": false,
+    "売店": false,
+    "自動販売機": false,
+    "コインランドリー": false,
+    "AC電源": false,
+    "ペット可": false,
+    "キャンプサイトへ車の乗り入れ": false,
+    "ゴミ捨て場": false,
+    "管理棟": false,
+    "レンタル用品": false,
+    "BBQエリア": false,
+    "遊具・アスレチック": false,
+    "川遊び": false
+  }
+}

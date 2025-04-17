@@ -1,0 +1,60 @@
+{
+  "宿泊情報": {
+    "チェックイン時間": "",
+    "チェックアウト時間": "",
+    "客室数": 0
+  },
+  "設備・アメニティ": {
+    "Wi-Fi": { "value": false, "note": "" },
+    "駐車場": { "value": false, "note": "" },
+    "レストラン": { "value": false, "note": "" },
+    "バー": { "value": false, "note": "" },
+    "プール": { "value": false, "note": "" },
+    "ジム": { "value": false, "note": "" },
+    "スパ": { "value": false, "note": "" },
+    "会議室": { "value": false, "note": "" },
+    "自動販売機": { "value": false, "note": "" },
+    "コインランドリー": { "value": false, "note": "" },
+    "エレベーター": { "value": false, "note": "" }
+  },
+  "ルール・禁止事項": {
+    "喫煙": { "value": false, "note": "" },
+    "ペット": { "value": false, "note": "" },
+    "パーティー": { "value": false, "note": "" },
+    "騒音制限": ""
+  },
+  "周辺情報": {
+    "最寄り駅": "",
+    "アクセス": "",
+    "周辺観光スポット": []
+  },
+  "サービス": {
+    "アクティビティ": [
+      {
+        "title": "",
+        "content": "",
+        "price": ""
+      }
+    ],
+    "館内施設": [
+      {
+        "title": "",
+        "content": "",
+        "price": ""
+      }
+    ],
+    "貸出備品": [
+      {
+        "title": "",
+        "content": "",
+        "price": ""
+      }
+    ],
+    "朝食": { "value": false, "note": "" },
+    "夕食": { "value": false, "note": "" },
+    "荷物預かり": { "value": false, "note": "" },
+    "ルームサービス": { "value": false, "note": "" },
+    "24時間フロント対応": { "value": false, "note": "" },
+    "対応言語": []
+  }
+}

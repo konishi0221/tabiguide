@@ -1,0 +1,165 @@
+/* === ベース設定 === */
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background-color: #e0e0e0;
+  color: #333;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* === ヘッダー固定 === */
+.dashboard-header {
+  /* height: 64px; */
+  background: #fff;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* padding: 0 24px; */
+  flex-shrink: 0;
+  z-index: 1000;
+}
+
+/* === サイド + メインラッパー === */
+.dashboard-container {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - 64px);
+  overflow: hidden;
+}
+
+.facility-name {
+  margin-left: 20px;
+  font-weight: bold;
+  font-size: 20px
+}
+
+/* === サイドナビ === */
+#side_navi {
+  width: 240px;
+  background-color: #1f1f1f;
+  color: #fff;
+  padding: 24px 10px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+#side_navi .open_in_new {
+  font-size: 18px;
+}
+
+/* === メイン部分 === */
+#app {
+  flex: 1;
+  overflow-y: auto;
+  background-color: whitesmoke;
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+/* 中央寄せの main */
+#app main {
+  max-width: 1000px;
+  margin: 0 auto;
+  background-color: white;
+  box-sizing: border-box;
+  padding: 20px
+}
+
+.dashboard-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0px;
+}
+
+.dashboard-header-logo img {
+  height: 35px;
+  padding: 15px 54px;
+  /* width: calc(210px); */
+  /* height: 30px; */
+  /* margin-right: 8px; */
+}
+
+.dashboard-header-icons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-right: 20px;
+}
+.dashboard-header-icons a {
+  margin-left: 10px
+}
+
+@media screen and (max-width: 768px) {
+  .dashboard-container {
+    flex-direction: column;
+  }
+  #side_navi {
+    position: static;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  #side_navi ul {
+    display: flex;
+    flex-direction: row;
+    padding: 10px;
+  }
+  #side_navi ul li {
+    margin: 0 8px;
+  }
+  #app {
+    padding: 20px;
+  }
+  .dashboard-header-search input {
+    width: 120px;
+  }
+}
+
+.user-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+  text-align: center;
+  line-height: 36px;
+  cursor: pointer;
+}
+
+.profile-menu {
+  position: absolute;
+  top: 64px;
+  right: 24px;
+  width: 220px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  padding: 1em;
+  z-index: 999;
+}
+
+.profile-menu p {
+  margin: 0 0 6px;
+  font-size: 14px;
+}
+
+.profile-menu a {
+  display: block;
+  margin-top: 10px;
+  font-size: 14px;
+  text-decoration: none;
+  color: #007bff;
+}
+
+.profile-menu a:hover {
+  text-decoration: underline;
+}
