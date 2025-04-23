@@ -1,0 +1,135 @@
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* ───────── カテゴリバー ───────── */
+.category-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 55px;
+  background: #fff;
+  overflow-x: auto;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.category-bar::-webkit-scrollbar { display: none; }
+
+.category-bar {
+  position: fixed;
+  top: 0;
+}
+
+/* 各カテゴリボタン */
+.category_icon{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 70px;            /* 最低幅 */
+  padding: 6px 4px;
+  line-height: 1;
+  color: #555;
+  user-select: none;
+}
+.category_icon .material-symbols-outlined{
+  font-size: 24px;
+}
+.category_icon .name{
+  font-size: 11px;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+.category_icon.active{
+  background: #2E8B57;    /* primary 色 */
+  color: #fff;
+  border-radius: 6px;
+}
+
+/* 右端グラデと → アイコン */
+.after_gradient{
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 55px;
+  width: 36px;
+  background: linear-gradient(270deg, rgba(255,255,255,1) 20%, rgba(255,255,255,0) 100%);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ───────── スライドパネル（MapPanel.vue）───────── */
+.detail-container{
+  position: fixed;
+  left: 0; right: 0; bottom: -100%;
+  max-height: 70%;
+  background: #fff;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  box-shadow: 0 -2px 8px rgba(0,0,0,.15);
+  transition: transform .35s ease;
+  padding: 14px 18px;
+  overflow-y: auto;
+  z-index: 20;
+}
+.detail-container.active{ transform: translateY(-100%); }
+
+/* パネル内ヘッダー */
+.detail-container .header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header .material-symbols-outlined{
+  font-size: 35px;
+  line-height: 35px;
+  width: 35px;
+  text-align: center;
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+/* 本文／画像 */
+.detail-container p{
+  padding-bottom: 20px;
+  white-space: pre-line;
+}
+.detail-container img{
+  width: calc(100% - 10px);
+  margin: 0 5px 10px;
+  position: relative;
+}
+
+.point_wrap,
+.point_wrap .point_bg_image{
+  width: calc(80% - 10px);
+  height: calc(80vh);
+  background-position: center;
+  background-size: cover;
+  transition: all .35s ease-out;
+}
+.point_wrap_all .point_bg_image{
+  height: calc(80vh);
+}
+
+.map_link{
+  border: solid 1px #b6b6b6;
+  padding: 10px;
+}
+
+/* ───────── Google Map ───────── */
+#map{
+  position: absolute;
+  inset: 0;
+  top: 55px;                 /* カテゴリバー分だけ下げる */
+  height: calc(100vh - 55px);
+  transition: all .3s ease-out;
+}
+#map.active{
+  /* 例: パネル表示時に高さを縮めたい場合 */
+  /* height: calc(70vh - 55px); */
+}

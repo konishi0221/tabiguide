@@ -1,0 +1,46 @@
+{
+  "部屋の大きさ": { "placeholder": "20㎡" },
+
+  "ベッド構成": [
+    { "type": "布団",       "count": 0, "note": "4" },
+    { "type": "セミダブル", "count": 0, "note": "1" }
+  ],
+
+  "料金": {
+    "平日":   { "placeholder": "8000円" },
+    "週末":   { "placeholder": "9500円" },
+    "繁忙期": { "placeholder": "12000円" }
+  },
+
+  "客室設備・アメニティ": {
+    "Wi-Fi":          { "value": false, "note": "高速光回線／200Mbps" },
+    "テレビ":         { "value": false, "note": "42型液晶テレビ" },
+    "冷蔵庫":         { "value": false, "note": "120L／冷凍室付き" },
+    "電気ケトル":     { "value": false, "note": "1.2L／ティーバッグ付" },
+    "エアコン":       { "value": false, "note": "個別空調／冷暖房" },
+    "加湿器":         { "value": false, "note": "冬季自動設置" },
+    "金庫":           { "value": false, "note": "ノートPC収納サイズ" },
+    "浴衣":           { "value": false, "note": "大人用フリーサイズ" },
+    "タオル類":       { "value": false, "note": "大・中・小 各1枚" },
+    "歯ブラシセット": { "value": false, "note": "使い捨てタイプ" },
+    "シャンプー類":   { "value": false, "note": "シャンプー・コンディショナー・ボディソープ" }
+  },
+
+  "バス・トイレ": {
+    "専用バスルーム":  { "value": false, "note": "ユニットバス" },
+    "専用トイレ":     { "value": false, "note": "温水洗浄便座" },
+    "露天風呂付":     { "value": false, "note": "檜風呂／6‑23時" },
+    "貸切風呂利用可": { "value": false, "note": "45分2000円／要予約" }
+  },
+
+  "景観・特徴": {
+    "眺望":         { "placeholder": "庭園ビュー" },
+    "バリアフリー": { "value": false, "note": "段差なし・幅広ドア" }
+  },
+
+  "備考": {
+    "type": "textarea",
+    "rows": 4,
+    "note": "角部屋／防音仕様"
+  }
+}

@@ -1,0 +1,282 @@
+/* ==========================================
+   00 RESET / 基本トークン（必要最低限）
+========================================== */
+body{
+  margin:0;
+  font-family:system-ui,sans-serif;
+  color:#333;
+  background:#e0e0e0;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.material-symbols-outlined{color:#000}
+
+/* ==========================================
+   10 LAYOUT – ヘッダー・サイド・メイン
+========================================== */
+.dashboard-header{
+  height:64px;
+  background:#fff;
+  border-bottom:1px solid #eee;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;z-index:1000;
+}
+.dashboard-container{display:flex;flex:1;height:calc(100vh - 64px);overflow:hidden;}
+
+#side_navi{
+  width:240px;
+  padding:24px 10px;
+  box-sizing:border-box;overflow-y:auto;
+  flex-shrink:0;
+  transition:transform .25s ease;
+}
+
+/* メイン */
+#app{flex:1;overflow-y:auto;background:whitesmoke;padding:32px;box-sizing:border-box;}
+#app main{max-width:1000px;margin:0 auto;background:#fff;padding:20px;box-sizing:border-box;box-shadow:1px 0 4px rgba(0,0,0,.08)}
+
+/* ==========================================
+   20 COMPONENTS – 共通 UI パーツ
+========================================== */
+/* ハンバーガー */
+.menu-btn{display:none;background:transparent;border:none;font-size:28px;padding:8px 16px;cursor:pointer;color:#333}
+
+/* CRUD 行 */
+.crud-item{
+  overflow: hidden;
+  display:flex;
+  gap:10px;
+  align-items:
+  flex-start;
+  padding:10px;
+  margin-bottom:12px;
+  background:#fafafa;border:1px solid #e0e0e0;border-radius:6px
+}
+.crud-title{flex:0 0 160px;height:36px}
+.crud-content{
+  /* flex:1 1 auto; */
+  min-height:36px;
+  resize:vertical;
+  margin-bottom: 0px
+}
+.crud-price{flex:0 0 90px;height:36px;}
+.crud-item input,.crud-item textarea{width:100%;box-sizing:border-box;font-size:14px;padding:6px 8px;border:1px solid #ccc;border-radius:4px}
+.crud-delete{
+  flex:0 0 60px;height:36px;padding:0 10px;font-size:13px;background:#b6b6b6;border:1px solid #ccc;border-radius:4px;cursor:pointer
+
+}
+.crud-delete:hover{background:#f8d7da;border-color:#f5c2c7;color:#a71d2a}
+.crud-add{margin-top:6px;font-size:13px;padding:4px 16px;background:#007bff;color:#fff;border:none;border-radius:4px;cursor:pointer}
+.crud-add:hover{background:#005dc1}
+
+
+@media(max-width:768px){
+  .crud-item{
+    display: block;
+  }
+  .crud-price,.crud-content,.crud-title {
+    margin-top: 10px
+  }
+  .crud-content {
+    min-height: 100px ;
+  }
+  .crud-item .crud-price {
+    width: calc(100% - 50px)
+  }
+  .crud-delete {
+    margin-top: 10px;
+    float: right;
+  }
+}
+
+input[type=text],input[type=number],input[type=email],select,textarea{
+  width:calc(100% - 20px);
+  max-width:500px;padding:10px;border:1px solid #ccc;border-radius:4px}
+label{font-weight:600;display:block;
+  margin-bottom:6px;
+  margin-top: 30px
+}
+.radio-group{
+  gap:12px;
+  align-items:center;
+  margin-top:4px
+}
+.radio-group label{
+  margin-top: 10px;
+  font-weight: normal;
+  padding-left: 10px;
+  display: inline-block;
+}
+.radio-group input[type=text]{
+  display: block ;
+}
+
+/* カード系セクション */
+.setting-section,.form-section,.card-section,.panel-box{
+  background:#fff;padding:1.5em;margin-bottom:2em;
+  border:1px solid #ddd;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.04);
+}
+
+/* ==========================================
+   30 SKIN – 管理画面カラーリング
+========================================== */
+.dashboard-header-logo{
+  display:block;
+  float: left;
+  align-items:center;
+  font-weight:bold;
+  font-size:18px;
+  color:#333;border-right:1px solid #eee;
+  height: 65px;
+  position: relative;
+  width: calc(239px)
+}
+.dashboard-header-logo img{
+  height:40px;width:auto;
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateY(-50%) translateX(-50%);
+  -webkit-transform: translateY(-50%) translateX(-50%);
+}
+
+.dashboard-header-search{display:flex;align-items:center;background:#f3f3f3;border-radius:8px;padding:4px 12px}
+.dashboard-header-search input{border:none;background:transparent;outline:none;padding:4px;width:200px}
+
+.dashboard-header-icons{display:flex;align-items:center;gap:8px;padding-right:12px}
+.dashboard-header-icons a{margin-left:10px}
+
+
+.smh_facility_name {
+  display: none
+}
+
+@media(max-width:768px){
+  .dashboard-header {
+    position: relative;
+  }
+
+  .dashboard-header-logo{
+    border-right:0px;
+    position: absolute;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+    -webkit-transform: translateY(-50%) translateX(-50%);
+  }
+  .dashboard-header-logo img{
+
+  }
+
+  .smh_facility_name {
+    display: block;
+    text-align: center;
+    width: calc(100%);
+    /* color: white; */
+    background-color: white;
+    padding:6px  0;
+    margin: 0;
+    border-bottom: solid 1px #dcdcdc;
+    box-shadow:1px 0 4px rgba(0,0,0,.08);
+  }
+}
+
+#side_navi{
+  background:#fff;color:#333;border-right:1px solid #eee;
+}
+#side_navi h3{font-size:14px;margin:24px 0 0;line-height:35px;overflow:hidden}
+#side_navi h3:first-of-type{margin-top:0}
+#side_navi .h3_title{float:left;margin-left:10px}
+#side_navi .side_icon{float:left;line-height:35px}
+#side_navi ul{list-style:none;padding-left:25px;margin:0}
+#side_navi ul li{margin:6px 0}
+#side_navi ul li a{display:block;padding:6px 10px;font-size:14px;color:#333;text-decoration:none;border-radius:4px}
+#side_navi ul li a:hover{background:#f0f0f0;color:#000}
+
+/* ボタン */
+button,.save-button{background:#007bff;color:#fff;padding:10px 20px;font-size:14px;border:none;border-radius:4px;cursor:pointer}
+button:hover{opacity:.9}
+.save-button{margin-top:24px;}
+
+/* ユーザーアイコン */
+.user-icon{width:32px;height:32px;border-radius:50%;background:#007bff;color:#fff;font-size:14px;font-weight:bold;text-align:center;line-height:32px;cursor:pointer}
+
+/* プロフィールメニュー */
+.profile-menu{position:absolute;top:64px;right:24px;width:220px;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,.1);padding:1em;z-index:999}
+.profile-menu p{margin:0 0 6px;font-size:14px}
+.profile-menu a{display:block;margin-top:10px;font-size:14px;color:#007bff;text-decoration:none}
+.profile-menu a:hover{text-decoration:underline}
+
+/* タブ */
+.tab-nav{
+  width: 100%;
+  overflow-x: scroll;
+  display:flex;gap:8px;margin-bottom:24px;border-bottom:1px solid #ccc}
+.tab-nav button{
+  background:none;
+  white-space:nowrap;
+  border:none;font-size:14px;font-weight:500;color:#555;padding:12px 16px;cursor:pointer;border-bottom:2px solid transparent;transition:.2s;border-radius:0}
+.tab-nav button:hover{color:#000;border-color:#007bff}
+.tab-nav button.active{color:#007bff;border-color:#007bff;font-weight:bold}
+
+@media(max-width:768px){
+
+  .tab-nav{
+    overflow-x: hidden;
+    overflow-y:initial;
+    display: block;
+  }
+
+  .tab-nav button {
+    width: calc(50%);
+    display:block;
+    float: left;
+    border: solid 1px #dcdcdc;
+  }
+
+}
+/* ==========================================
+   40 RESPONSIVE – モバイル調整
+========================================== */
+@media(max-width:768px){
+  .dashboard-container{flex-direction:column}
+  .menu-btn{display:block}
+
+  #side_navi{
+    position:fixed;top:64px;left:0;height:calc(100vh - 64px);
+    width:240px;max-width:80vw;transform:translateX(-100%);
+    box-shadow:2px 0 8px rgba(0,0,0,.15);z-index:1000;overflow-y:auto;
+    top:0;
+    height: 100vh;
+  }
+  #side_navi.open{transform:translateX(0)}
+  body.menu-open{overflow:hidden}
+
+  #side_navi ul{padding-left:18px}
+  #app{padding:20px}
+  .dashboard-header-search input{width:120px}
+}
+
+/* ==========================================
+   90 QUICK FIX – 個別パッチ (ここに追加)
+========================================== */
+.facility-name{
+  margin-left:20px;font-weight:bold;font-size:18px;line-height:64px;white-space:nowrap;color:#333;
+}
+@media(max-width:768px){
+  .facility-name{
+    display: none
+  }
+
+}
+
+/* label 上書きを一括で保持 */
+label,.setting-section label,.form-section label{font-weight:600;margin-bottom:6px;color:#333}
+
+.none {
+  display: none
+}

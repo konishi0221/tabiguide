@@ -1,0 +1,420 @@
+body {
+  margin: 0;
+  font-family: "游明朝", YuMincho, "ヒラギノ明朝 ProN W3", "Hiragino Mincho ProN","HG明朝E","ＭＳ Ｐ明朝","ＭＳ 明朝",serif;
+  vertical-align: middle;
+}
+form {
+  display: inline;
+}
+a {
+  color: black;
+  text-decoration: none;
+}
+
+img {
+// width: 100%;
+}
+
+
+main {
+  width: calc(100% - 20px);
+  max-width: 1200px;
+  margin: auto;
+  min-height:calc(100vh - 129px);
+
+  @media (max-width: 1000px) {
+    min-height:calc(100vh - 107px);
+  }
+}
+
+h1, h2 {
+  text-align: center;
+  font-size: 2em;
+  @media (max-width: 1000px) {
+    font-size:21px;
+  }
+}
+
+
+.clear {
+  clear: both;
+}
+input{
+  border: none;
+  outline: none;
+  background-color:transparent;
+  padding: 0;
+  color: white;
+  cursor: pointer;
+}
+
+ul {
+  list-style: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translateY(-50%) translateX(-50%);
+  -webkit-transform: translateY(-50%) translateX(-50%);
+  width: 100%;
+  max-width: 600px;
+  padding: 0
+}
+li.menu_list {
+  display: block;
+  text-align: center;
+  padding-top:20px;
+  padding-bottom:20px;
+  transition: color 0.3s linear;
+
+  &:hover {
+    color: rgba(0,0,0,0.3);
+  }
+}
+
+#menu_wrap, #hover_image_wrap {
+  z-index: 100;
+  background-color: rgba(255,255,255,0.9);
+  width: 100%;
+  height: 100%;
+  top: 0;
+  position: fixed;
+  display: none;
+
+  #close, #image_close {
+    position: absolute;right:5px;
+    top: 5px;
+    color: black
+  }
+}
+
+
+header {
+  z-index: 10;
+  background-color: black;
+  overflow: hidden;
+  position: fixed;
+  // height: 60px;
+  width: 100%;
+  color: white;
+}
+
+#header_padding {
+  height: 70px;
+  @media (max-width: 1000px) {
+    height: 55px;
+  }
+}
+
+#rogo {
+  // position: fixed;
+  float: left;
+  overflow: hidden;
+  left: 0px;
+  top: 0px;
+  height: 70px;
+  @media (max-width: 1000px) {
+    height: 55px;
+  }
+
+
+  img {
+    padding-top:5px;
+    padding-bottom:10px;
+    padding-left: 20px;
+    padding-right: 0px;
+    height: 55px;
+    // width: 100%;
+    float: left;
+    @media (max-width: 1000px) {
+      height: 45px;
+
+    }
+  }
+  div.title_wrap {
+    float: left;
+    margin-top: 10px;
+    margin-left: 5px;
+
+    @media (max-width: 1000px) {
+      margin-top: 5px;
+    }
+    div {
+      margin-left: 5px
+    }
+    div.jp {
+      margin-top: 8px;
+      font-size: 20px;
+      line-height:100%;
+    }
+    div.en {
+      font-size: 13px;
+      line-height:13px;
+      text-align: center;
+    }
+
+  }
+}
+
+a {
+  #rogo {
+    color: white;
+  }
+}
+
+
+#menu {
+  float: right;
+  margin-top: 5px;
+  overflow: hidden;
+  margin-right: 5px;
+
+  @media (max-width: 1000px) {
+    margin-top: 0px;
+  }
+}
+
+.material-symbols-outlined {
+  cursor: pointer;
+  vertical-align: middle;
+  text-align: center;
+  line-height: 55px;
+  height: 55px;
+  width:55px;
+  size: 55px;
+  font-size: 35px;
+}
+
+
+#lang {
+  float: right;
+  font-size: 18px;
+  overflow: hidden;
+  padding-top: 15px;
+  margin-top: 3px;
+  margin-right: 20px;
+
+  @media (max-width: 1000px) {
+    padding-top: 10px;
+    margin-right: 0px;
+    font-size: 15px;
+  }
+
+  #slash {
+    display: inline-block;
+    line-height: 18px;
+    margin-left :10px;
+    margin-right :10px;
+  }
+
+  input[type="submit"] {
+    padding: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    line-height: 18px;
+    border-radius: 3px;
+  }
+  input.selected {
+    background-color: white;
+    color: black;
+  }
+}
+
+#main {
+  background-position:center;
+  height: auto;
+  padding-bottom: 50%;
+  background-size: cover;
+  @media (max-width: 600px) {
+    padding-bottom: 100%;
+  }
+}
+#manchikan_text_wrap {
+  padding-top: 40px;
+  width: calc(100% - 40px);
+  max-width: calc(1200px);
+  margin: auto;
+  overflow: hidden;
+}
+#text_image {
+  float: left;
+  width: calc(50%);
+  @media (max-width: 1000px) {
+    float: none;
+    width:calc(100%);
+  }
+}
+#manchikan_text {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  float: right;
+  line-height: 200%;
+  color :black;
+
+  width:calc(60% - 250px);
+  margin-bottom: 20px;
+  @media (max-width: 1000px) {
+    float: none;
+    width:calc(100%);
+    writing-mode: horizontal-tb;
+    text-orientation: mixed;
+  }
+}
+
+  #manchikan_text_image {
+    background-position: center;
+    background-size: cover;
+    float: left;
+    width: calc(40%);
+    margin: 5% 10%;
+    height: 0;
+    padding-bottom: 60%;
+    @media (max-width: 1000px) {
+      margin: 5% 0%;
+      height: 200px;
+      float: none;
+      width:calc(100%);
+    }
+  }
+
+
+// #base_info_wrap {
+//   padding-top: 40px;
+//   padding-bottom: 40px;
+//   // background-color: rgba(215,215,215,1)
+//
+//
+//   #base_info {
+//     width: calc(100% - 20px);
+//     margin: auto;
+//     border-top: solid 1px;
+//     max-width: 1200px
+//   }
+// }
+
+#reservation_btn {
+  background-color: black;
+  color: white;
+  position: fixed;
+  bottom: 20px;
+  width: 200px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  text-align: center;
+  left:calc(50% - 100px);
+  box-shadow: 2px 3px 4px black;
+
+  @media (max-width: 1000px) {
+    width: 200px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
+}
+
+footer {
+  background-color: #424242;
+
+
+  #footer_inner {
+    overflow: hidden;
+    text-align: left;
+    color: white;
+    width: 1200px;
+    max-width: calc(100% - 20px);
+    margin:  auto;
+    padding-bottom: 40px;
+
+    h2 {
+      text-align: left;
+      margin-left: 20px
+    }
+
+    div {
+
+      h3 {
+      }
+      overflow: hidden;
+      padding: 20px;
+      float: left;
+      width: calc(50% - 40px);
+      @media (max-width: 1000px) {
+        width: calc(100%);
+
+      }
+
+
+      a {
+        display: inline-block;
+        border:solid 1px white;
+        padding:10px 20px;
+        color: white;
+        transition: all 0.3s;
+      }
+      a:hover {
+        background-color: rgba(255,255,255,.3)
+      }
+
+
+    }
+  }
+}
+
+
+
+#copyright {
+  background-color: black;
+  color: white;
+  padding: 10px;
+  text-align:right;
+  font-size: 12px;
+clear: both;
+  p {
+    padding: 0;
+    margin: 0;
+
+  }
+}
+
+.top_border {
+  border-top:solid 1px;
+  padding-top: 60px;
+  margin-top: 60px;
+}
+.top_border::before {
+  content: "";
+  position: absolute;
+  width: 180px;
+  margin: auto;
+  left: 50%;
+  display: block;
+  height: 5px;
+  // background-color: black
+}
+
+
+#hover_image_wrap {
+  left: 0;
+  top:0;
+  display: none;
+  position: fixed;
+
+  .hover_image_detail {
+    width: calc(100% - 20px);
+    max-width: 1200px;
+    overflow: hidden;
+    z-index: 100;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+    -webkit-transform: translateY(-50%) translateX(-50%);
+
+    img {
+      width: calc(100% - 20px);
+
+    }
+    p {
+      text-align: center;
+    }
+  }
+
+}

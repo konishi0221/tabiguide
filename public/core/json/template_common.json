@@ -1,0 +1,28 @@
+{
+  "基本情報": {
+    "施設名": "満竹華庵 上野 EAST",
+    "施設タイプ": ["minpaku", "hotel", "ryokan", "camp"],
+    "紹介文": {
+      "type": "textarea",
+      "rows": 4,
+      "placeholder": "駅徒歩1分、全室バスルーム付きの和モダン旅館です。"
+    }
+  },
+  "緯度経度": {
+    "緯度": "35.68951",
+    "経度": "139.69172"
+  },
+  "連絡先": {
+    "住所": "東京都台東区上野7-1-1",
+    "電話番号": "03-1234-5678",
+    "メール": "info@example.com",
+    "公式サイト": "https://example.com"
+  },
+  "rooms": [],
+  "base_notes": "",
+  "amenities_notes": "",
+  "rule_notes": "",
+  "location_notes": "",
+  "appeal_notes": "",
+  "others_notes": ""
+}

@@ -1,0 +1,10 @@
+# --- 除外したい物 ---
+node_modules/
+.git/
+*.env
+# Cloud Shell エディタや IDE の設定など
+.vscode/
+.idea/
+# Mac のメタ
+.DS_Store
+core/.env

@@ -1,0 +1,166 @@
+body {
+  /* font-family: Arial, sans-serif;
+  padding:0;
+  margin: 0; */
+}
+#chat_wrap {
+  position: fixed;
+  bottom: 50px;
+  right: 50px;
+  width: calc(500px);
+  height:  500px;
+  background-color: white;
+  overflow:hidden;
+  box-shadow: 2px 7px 8px rgba(0,0,0,.3);
+  overflow: hidden; /* スクロールバーを隠す */
+  border-radius: 5px;
+  display: none;
+}
+
+
+@media (max-width: 600px) {
+  #chat_wrap {
+    width: calc(100%);
+    bottom: 0px;
+    right: 0px;
+  }
+}
+
+#chat-container {
+  overflow: hidden;
+  position: relative;
+  height: calc(100% - 40px);
+}
+#chat-app {
+  overflow: hidden;
+  position: relative;
+  flex-direction: column;
+  display: flex;
+  flex-direction: column; /* 要素を縦に並べる */
+  height: 100%;
+}
+.chat-box {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    margin-bottom: 0px;
+    padding: 5px;
+    /* padding-bottom: 54px; */
+    /* height: calc(100vh - 57px); */
+    height:calc( 100% - 57px);
+    position: relative;
+    flex-grow: 1; /* 残りのスペースを占める */
+    overflow-y: auto; /* コンテンツが増えるとスクロール可能 */
+ }
+ .message_wrap {
+   overflow: hidden;
+   width: 100%;
+   position: relative;
+ }
+
+.message {
+  margin: 5px 0;
+  padding: 5px 10px;
+  border-radius: 5px;
+  max-width: calc(100% - 100px);
+  position: relative;
+}
+
+.message a{
+  text-decoration: underline;
+  background-color: whitesmoke
+}
+
+.user {
+  background: #424242;
+  float: right;
+  color: white;
+}
+
+.bot {
+  margin-left: 20px;
+  background: #f1f1f1;
+  float: left;
+}
+.bot::before {
+  content: "";
+  width: 15px;
+  height: 15px;
+  background-color: #f1f1f1;
+  position: absolute;
+  left: -10px;
+  top: 10px;
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  transform: rotate(-90deg);
+}
+
+.bot_icon {
+  float: left;
+  width: 45px;
+  height: 45px;
+  overflow: hidden;
+  background-color: black;
+  /* padding: 5px; */
+  border-radius: 500px;
+}
+
+.bot_icon img{
+  width: 100%;
+  display: block;
+  width: 45px;
+  height: 45px;
+}
+.input-box {
+  display: block;
+  position: relative;
+  bottom: 0;
+  left:0;
+  overflow: hidden;
+  width: calc(100% - 10px);
+  padding: 5px;
+  background-color: white;
+  border-top: solid 1px #dcdcdc;
+  position: relative;
+}
+
+.input-box input {
+  flex: 1;
+  padding: 0px;
+  padding-left:8px;
+  padding-right:8px;
+  margin: 0;
+  border: 1px solid #ddd;
+  border-radius:  4px 0px 0px 4px ;
+  float: left;
+  width: calc(100% - 90px);
+  font-size: 16px;
+  line-height: 34px;
+  height: 34px;
+  color: black;
+  box-shadow: inset 1px 2px 5px rgba(0,0,0,.1);
+}
+
+.input-box button {
+  padding:0;
+  margin: 0px;
+  float: left;
+  background: #424242;
+  color: white;
+  border-radius: 0px 4px 4px 0px;
+  cursor: pointer;
+  width: calc(70px);
+  border: none;
+  overflow: hidden;
+  vertical-align: middle;
+  display: block;
+}
+.input-box span.material-symbols-outlined {
+  line-height: 36px;
+  width: inherit;
+  height: 36px;
+  font-size: 30px;
+  display: block;
+  vertical-align: middle;
+}
+button:hover {
+  /* background: #0056b3; */
+}

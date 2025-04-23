@@ -1,0 +1,2 @@
+# public/.htaccess
+Redirect 403 /core

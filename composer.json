@@ -1,13 +1,8 @@
 {
-    "require": {
-        "vlucas/valitron": "^1.4",
-        "openai-php/client": "^0.10.3",
-        "symfony/http-client": "^7.2",
-        "nyholm/psr7": "^1.8"
-    },
-    "config": {
-        "allow-plugins": {
-            "php-http/discovery": true
-        }
-    }
+  "name": "tabiguide/app",
+  "require": {},
+  "scripts": {
+    "start": "php -S 0.0.0.0:$PORT -t public",
+    "dev": "php -d max_execution_time=0 -S localhost:8080 -t public router.php"
+  }
 }

@@ -1,0 +1,27 @@
+/* --- Form elements : revert to UA default ----------------------- */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+select,
+textarea{
+  /* できるかぎり UA スタイルへ巻き戻し */
+  all: revert;        /* Chrome / Firefox / Safari 15+ 対応 */
+
+  /* Safari 14 以下フォールバック */
+  box-sizing: content-box;
+  width: auto;
+  padding: initial;
+  margin: initial;
+  border: initial;
+  border-radius: initial;
+  font: inherit;
+  color: initial;
+  background: initial;
+  appearance: auto;
+  background-color: white
+}
+fieldset{
+  border:none;
+  width: calc(100%);
+  padding:0;
+}
