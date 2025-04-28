@@ -62,26 +62,6 @@ if ($result && $result['design_json']) {
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link rel="stylesheet" href="design.css">
     <style>
-    .chat-header {
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0 16px;
-    }
-
-    .header-logo {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-    }
-
-    .header-logo img {
-      max-height: 95%;
-      max-width: 80%;
-      object-fit: contain;
-    }
     </style>
 </head>
 <body>
