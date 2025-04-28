@@ -60,6 +60,7 @@ textarea {
   background: #fff;
   overflow: hidden;
   line-height: 40px;
+  background-color: whitesmoke;
 }
 
 .manager:first-child {
@@ -76,7 +77,7 @@ textarea {
 }
 
 .state {
-  height: 40px;
+  /* height: 40px; */
   margin-bottom: 0;
   width: 200px;
   float: right;

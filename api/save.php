@@ -1,20 +1,34 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/cros.php';
+
+
 require_once dirname(__DIR__) . '/public/core/config.php';
 require_once dirname(__DIR__) . '/public/core/db.php';
 include_once(  dirname(__DIR__) . '/public/core/functions.php');
 
-function save_unknown(PDO $pdo, string $pageUid, string $userId,
-                      string $question, string $note = ''): void
+function save_unknown(
+    PDO $pdo,
+    string $pageUid,
+    string $userId,
+    string $question,
+    string $tags = ''
+): void
 {
-    $sql = 'INSERT INTO question (page_uid, chat_id, question, answer, state)
-            VALUES (:p, :c, :q, "", "new")';
+    $sql = 'INSERT INTO question
+              (page_uid, chat_id, question, answer, tags, state)
+            VALUES
+              (:p, :c, :q, "", :t, "new")';
+
     $pdo->prepare($sql)->execute([
         ':p' => $pageUid,
         ':c' => $userId,
-        ':q' => $question
+        ':q' => $question,
+        ':t' => $tags
     ]);
 }
+
+
 
 function save_staff(PDO $pdo, array $payload): void
 {

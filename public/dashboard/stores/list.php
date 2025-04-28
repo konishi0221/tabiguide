@@ -44,6 +44,8 @@ foreach ($stores as &$store) {
 }
 unset($store); // foreach参照を解放
 
+
+
 ?>
 
 <!DOCTYPE html>
@@ -180,7 +182,7 @@ unset($store); // foreach参照を解放
 
   <div class="dashboard-container">
 
-  <?php include('../components/side_navi.php'); ?>
+    <?php include(dirname(__DIR__) . '/components/side_navi.php'); ?>
     <div id="app">
       <main>
 

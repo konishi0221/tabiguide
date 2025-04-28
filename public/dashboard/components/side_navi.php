@@ -6,37 +6,140 @@ $page_uid_safe = urlencode($page_uid);
 ?>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@40,100,1,0" />
 
-<div id="side_navi">
+<style>
+  .open_in_new {
+    display: inline-block;
+    line-height: 14px;
+    vertical-align: middle;
+  }
 
-  <h3><span class="material-symbols-outlined side_icon">visibility</span><span class="h3_title">ゲストビュー</span></h3>
-  <ul>
-    <li><a href="/guest/index.php?page_uid=<?= $page_uid_safe ?>" target="_blank">
-      ゲスト用チャット <span class="material-symbols-outlined open_in_new">open_in_new</span>
-    </a></li>
-  </ul>
+  #side_navi {
+    width: 240px;
+    background: #fff;
+    padding: 20px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  #side_navi h3 {
+    padding: 10px 20px;
+    margin: 0;
+    font-size: 14px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  #side_navi .side_icon {
+    font-size: 20px;
+    color: #666;
+  }
+
+  #side_navi ul {
+    list-style: none;
+    margin: 0 0 20px 0;
+    padding: 0;
+  }
+
+  #side_navi li {
+    margin: 0;
+    padding: 0;
+  }
+
+  #side_navi li a {
+    display: flex;
+    align-items: center;
+    padding: 8px 20px 8px 48px;
+    color: #444;
+    text-decoration: none;
+    font-size: 13px;
+    transition: background-color 0.2s;
+  }
+
+  #side_navi li a:hover {
+    background-color: #f5f5f5;
+  }
+
+  #side_navi li a .material-symbols-outlined {
+    margin-left: 4px;
+    font-size: 14px;
+  }
+
+  @media (max-width: 768px) {
+    #side_navi {
+      position: fixed;
+      left: -240px;
+      top: 0;
+      bottom: 0;
+      transition: left 0.3s ease;
+      z-index: 1000;
+    }
+
+    #side_navi.open {
+      left: 0;
+    }
+
+    body.menu-open::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+    }
+  }
+</style>
+
+<div id="side_navi">
+  <h3><span class="material-symbols-outlined side_icon">visibility</span><span class="h3_title">ゲストページ</span></h3>
+
+  <?php
+$host = $_SERVER['HTTP_HOST'] ?? '';
+
+// ローカル判定（localhost か 127.0.0.1 系）
+$isLocal = preg_match('/^(localhost|127\.0\.0\.1)/', $host);
+
+$guest_base_url = $isLocal
+    ? 'http://localhost:5173/'          // 開発環境
+    : 'https://tabiguide-721ec.web.app/'; // 本番環境
+
+$guest_url = $guest_base_url . $page_uid_safe;
+?>
+<ul>
+  <li>
+    <a href="<?= htmlspecialchars($guest_url, ENT_QUOTES) ?>" target="_blank">
+      ゲストページを確認
+      <span class="material-symbols-outlined open_in_new">open_in_new</span>
+    </a>
+  </li>
+</ul>
+
 
   <h3><span class="material-symbols-outlined side_icon">smart_toy</span><span class="h3_title">AIチャット</span></h3>
   <ul>
-    <li><a href="/dashboard/ai/base.php?page_uid=<?= $page_uid_safe ?>">施設基本情報</a></li>
-    <li><a href="/dashboard/ai/index.php?page_uid=<?= $page_uid_safe ?>">追記情報</a></li>
-    <li><a href="/dashboard/chat_log/index.php?page_uid=<?= $page_uid_safe ?>">会話ログ一覧</a></li>
-    <li><a href="/dashboard/rooms/index.php?page_uid=<?= $page_uid_safe ?>">部屋を作成</a></li>
+    <li><a href="../ai/base.php?page_uid=<?= $page_uid_safe ?>">施設基本情報</a></li>
+    <li><a href="../chat_log/index.php?page_uid=<?= $page_uid_safe ?>">会話ログ一覧</a></li>
+    <li><a href="../rooms/index.php?page_uid=<?= $page_uid_safe ?>">部屋を作成</a></li>
+    <li><a href="../ai/faq.php?page_uid=<?= $page_uid_safe ?>">よくある質問</a></li>
   </ul>
 
   <h3><span class="material-symbols-outlined side_icon">map</span><span class="h3_title">マップ作成</span></h3>
   <ul>
-    <li><a href="/dashboard/stores/list.php?page_uid=<?= $page_uid_safe ?>">登録店舗一覧</a></li>
-    <li><a href="/dashboard/stores/index.php?page_uid=<?= $page_uid_safe ?>">店舗の追加</a></li>
+    <li><a href="../stores/list.php?page_uid=<?= $page_uid_safe ?>">登録店舗一覧</a></li>
+    <li><a href="../stores/index.php?page_uid=<?= $page_uid_safe ?>">店舗の追加</a></li>
   </ul>
 
   <h3><span class="material-symbols-outlined side_icon">palette</span><span class="h3_title">ユーザー画面</span></h3>
   <ul>
-    <li><a href="/dashboard/design/index.php?page_uid=<?= $page_uid_safe ?>">ユーザー画面設定</a></li>
+    <li><a href="../design/index.php?page_uid=<?= $page_uid_safe ?>">ユーザー画面設定</a></li>
+    <li><a href="../design/design.php?page_uid=<?= $page_uid_safe ?>">デザイン設定</a></li>
   </ul>
 
   <h3><span class="material-symbols-outlined side_icon">settings</span><span class="h3_title">施設の設定</span></h3>
   <ul>
-    <li><a href="/dashboard/settings/index.php?page_uid=<?= $page_uid_safe ?>">設定画面ヘ</a></li>
+    <li><a href="../settings/index.php?page_uid=<?= $page_uid_safe ?>">設定画面ヘ</a></li>
   </ul>
 </div>
 

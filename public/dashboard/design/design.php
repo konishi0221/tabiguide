@@ -1,0 +1,1180 @@
+<?php
+require_once dirname(__DIR__) . '/../core/dashboard_head.php';
+
+$page_uid = $_GET['page_uid'] ?? null;
+
+if (!$page_uid) {
+    echo "施設が選択されていません。";
+    exit;
+}
+
+// デザイン設定を取得
+$stmt = $pdo->prepare("SELECT design_json FROM design WHERE page_uid = :page_uid");
+$stmt->bindParam(':page_uid', $page_uid);
+$stmt->execute();
+$result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// デフォルト値
+$design = [
+    'primary_color' => '#1976D2',
+    'secondary_color' => '#2196F3',
+    'accent_color' => '#FF5722',
+    'header_text_color' => '#FFFFFF',
+    'tab_active_color' => '#FFFFFF',
+    'tab_inactive_color' => 'rgba(255,255,255,0.7)',
+    'bot_message_color' => '#E3F2FD',
+    'bot_text_color' => '#333333',
+    'user_message_color' => '#333333',
+    'user_text_color' => '#333333',
+    'message_text_color' => '#333333',
+    'bg_filter_color' => '#000000',
+    'bg_filter_opacity' => 0.2,
+    'bg_filter_blur' => 4,
+    'font_family' => 'Noto Sans JP',
+    'page_uid' => $page_uid,
+    'background_url' => null,
+    'icon_url' => null
+];
+
+// 保存されているデザイン設定があれば上書き
+if ($result && $result['design_json']) {
+    $saved_design = json_decode($result['design_json'], true);
+    if ($saved_design) {
+        $design = array_merge($design, $saved_design);
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>デザイン設定</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.prod.js"></script>
+    <link rel="stylesheet" href="/assets/css/admin_layout.css">
+    <link rel="stylesheet" href="/assets/css/admin_design.css">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=M+PLUS+1p:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <?php include(dirname(__DIR__) . '/components/dashboard_header.php'); ?>
+
+  <div class="dashboard-container">
+    <?php include(dirname(__DIR__) . '/components/side_navi.php'); ?>
+    <div id="app">
+      <main>
+        <h1>デザイン設定</h1>
+
+        <div class="layout-container">
+          <!-- プレビューエリア -->
+          <div class="preview-area">
+            <div class="preview-phones">
+              <!-- チャットプレビュー -->
+              <div class="phone-wrapper">
+                <div class="phone-frame">
+                  <div class="phone-header">
+                    <div class="phone-notch"></div>
+                    <div class="status-bar">
+                      <span>9:41</span>
+                      <div class="status-icons">
+                        <span class="material-symbols-outlined">signal_cellular_alt</span>
+                        <span class="material-symbols-outlined">wifi</span>
+                        <span class="material-symbols-outlined">battery_full</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="phone-content">
+                    <!-- チャット画面 -->
+                    <div class="guest-chat"
+                      :style="{
+                        backgroundImage: preview.icon_url 
+                          ? `url('${preview.icon_url}')` 
+                          : design.icon_url 
+                            ? `url('/upload/${design.page_uid}/images/background.jpg')`
+                            : 'none',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'no-repeat'
+                      }"
+                    >
+                      <div class="bg-filter"
+                        :style="{
+                          background: hexToRgba(design.bg_filter_color, design.bg_filter_opacity),
+                          backdropFilter: `blur(${design.bg_filter_blur}px)`,
+                          zIndex: 0
+                        }"
+                      ></div>
+                      <!-- ヘッダー -->
+                      <div class="chat-header" :style="{ backgroundColor: design.primary_color }">
+                        <h1 :style="{ color: design.header_text_color }">海辺の家</h1>
+                      </div>
+
+                      <div class="chat-messages">
+                        <div class="chat-message bot" :style="{ backgroundColor: design.bot_message_color }">
+                          <div class="bot-avatar"
+                            :style="{
+                              backgroundImage: preview.icon_url 
+                                ? `url('${preview.icon_url}')` 
+                                : design.icon_url 
+                                  ? `url('/upload/${design.page_uid}/images/icon.jpg')`
+                                  : 'none',
+                              backgroundColor: '#FFFFFF',
+                              backgroundSize: 'cover',
+                              backgroundPosition: 'center',
+                              backgroundRepeat: 'no-repeat'
+                            }"
+                          ></div>
+                          <div class="message-content" :style="{ color: design.bot_text_color }">
+                            ようこそ〜近くのおすすめグルメや観光スポットもご案内できますので、遠慮なくご相談ください。
+                          </div>
+                        </div>
+                        <div class="chat-message user" :style="{ backgroundColor: design.user_message_color }">
+                          <div class="message-content" :style="{ color: design.user_text_color }">
+                            チェックインの時間を教えてください。
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="guest-input">
+                        <input type="text" placeholder="メッセージを入力">
+                        <button>
+                          <span class="material-symbols-outlined">send</span>
+                        </button>
+                      </div>
+
+                      <!-- タブバー -->
+                      <div class="guest-tabs" :style="{ backgroundColor: design.secondary_color }">
+                        <button class="tab-button active" :style="{ color: design.tab_active_color }">
+                          <span class="material-symbols-outlined">chat</span>
+                          <span>チャット</span>
+                        </button>
+                        <button class="tab-button" :style="{ color: design.tab_inactive_color }">
+                          <span class="material-symbols-outlined">map</span>
+                          <span>周辺マップ</span>
+                        </button>
+                        <button class="tab-button" :style="{ color: design.tab_inactive_color }">
+                          <span class="material-symbols-outlined">schedule</span>
+                          <span>基本情報</span>
+                        </button>
+                        <button class="tab-button" :style="{ color: design.tab_inactive_color }">
+                          <span class="material-symbols-outlined">translate</span>
+                          <span>翻訳</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="phone-label">チャット画面</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 設定パネル -->
+          <div class="settings-panel">
+            <div class="template-selector">
+              <h3>テンプレート</h3>
+              <div class="template-grid">
+                <button v-for="(template, key) in templates" 
+                        :key="key"
+                        class="template-button"
+                        @click="applyTemplate(template)"
+                        :class="{ active: isCurrentTemplate(template) }">
+                  {{ template.name }}
+                </button>
+              </div>
+            </div>
+
+            <div class="color-palette">
+              <h3>カラー設定</h3>
+              <div class="palette-row">
+                <div class="color-group">
+                  <label>メインカラー</label>
+                  <div class="color-picker">
+                    <input type="color" v-model="design.primary_color">
+                  </div>
+                </div>
+                <div class="color-group">
+                  <label>サブカラー</label>
+                  <div class="color-picker">
+                    <input type="color" v-model="design.secondary_color">
+                  </div>
+                </div>
+                <div class="color-group">
+                  <label>ヘッダー文字色</label>
+                  <div class="color-picker">
+                    <input type="color" v-model="design.header_text_color">
+                  </div>
+                </div>
+              </div>
+              <div class="palette-row">
+                <div class="color-group">
+                  <label>ボットメッセージ背景</label>
+                  <div class="color-picker">
+                    <input type="color" v-model="design.bot_message_color">
+                  </div>
+                </div>
+                <div class="color-group">
+                  <label>ボットメッセージ文字色</label>
+                  <div class="color-picker">
+                    <input type="color" v-model="design.bot_text_color">
+                  </div>
+                </div>
+              </div>
+              <div class="palette-row">
+                <div class="color-group">
+                  <label>ユーザーメッセージ文字色</label>
+                  <div class="color-picker">
+                    <input type="color" v-model="design.user_message_color">
+                  </div>
+                </div>
+                <div class="color-group">
+                  <label>ユーザーメッセージ文字色</label>
+                  <div class="color-picker">
+                    <input type="color" v-model="design.user_text_color">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="image-preview">
+              <h3>画像設定</h3>
+              <div class="image-grid">
+                <div class="image-item">
+                  <div class="image-upload-area" 
+                       :class="{ 'has-image': preview.icon_url || design.icon_url }"
+                       @click="triggerFileInput('icon')"
+                       :style="{ backgroundImage: preview.icon_url ? `url('${preview.icon_url}')` : design.icon_url ? `url('/upload/${design.page_uid}/images/icon.jpg')` : 'none' }">
+                    <input type="file" 
+                           ref="iconInput" 
+                           accept="image/*"
+                           @change="handleImageUpload('icon', $event)" 
+                           style="display: none">
+                    <span v-if="!preview.icon_url && !design.icon_url" class="upload-placeholder">
+                      <span class="material-symbols-outlined">add_photo_alternate</span>
+                      <span>アイコンを選択</span>
+                    </span>
+                    <button v-if="preview.icon_url || design.icon_url" 
+                            class="delete-image-button"
+                            @click.stop="deleteImage('icon')">
+                      <span class="material-symbols-outlined">delete</span>
+                    </button>
+                  </div>
+                  <span>施設アイコン</span>
+                </div>
+
+                <div class="image-item">
+                  <div class="image-upload-area"
+                       :class="{ 'has-image': preview.background_url || design.background_url }"
+                       @click="triggerFileInput('background')"
+                       :style="{ backgroundImage: preview.background_url ? `url('${preview.background_url}')` : design.background_url ? `url('/upload/${design.page_uid}/images/background.jpg')` : 'none' }">
+                    <input type="file" 
+                           ref="backgroundInput" 
+                           accept="image/*"
+                           @change="handleImageUpload('background', $event)" 
+                           style="display: none">
+                    <span v-if="!preview.background_url && !design.background_url" class="upload-placeholder">
+                      <span class="material-symbols-outlined">add_photo_alternate</span>
+                      <span>背景画像を選択</span>
+                    </span>
+                    <button v-if="preview.background_url || design.background_url" 
+                            class="delete-image-button"
+                            @click.stop="deleteImage('background')">
+                      <span class="material-symbols-outlined">delete</span>
+                    </button>
+                  </div>
+                  <span>チャット背景</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- フィルター設定UIを追加 -->
+            <div class="filter-settings">
+              <div class="filter-item">
+                <label>背景フィルター色 (rgba)</label>
+                <div class="filter-controls">
+                  <input type="color" v-model="design.bg_filter_color">
+                  <input type="range" min="0" max="1" step="0.01" v-model.number="design.bg_filter_opacity">
+                  <span class="filter-value">{{ design.bg_filter_color }} / {{ design.bg_filter_opacity }}</span>
+                </div>
+              </div>
+              <div class="filter-item">
+                <label>ぼかし (px)</label>
+                <div class="filter-controls">
+                  <input type="range" min="0" max="20" step="1" v-model.number="design.bg_filter_blur">
+                  <span class="filter-value">{{ design.bg_filter_blur }}px</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="font-selector">
+              <h3>フォント設定</h3>
+              <select v-model="design.font_family" class="font-select">
+                <option v-for="font in availableFonts" :key="font.value" :value="font.value" :style="{ fontFamily: font.value }">
+                  {{ font.name }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="save-button" @click="saveDesign">設定を保存</button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <style>
+    .layout-container {
+      display: flex;
+      flex-direction: row;
+      min-height: 100vh;
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 1.25rem;
+      gap: 1.25rem;
+    }
+
+    .preview-area {
+      flex: 1;
+      position: sticky;
+      top: 4.5rem;
+      max-height: calc(100vh - 5.5rem);
+      overflow: hidden;
+      background: #f5f5f5;
+      border-radius: 0.75rem;
+      padding: 0.75rem;
+      z-index: 10;
+    }
+
+    .settings-panel {
+      flex: 1;
+      background: white;
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    @media (max-width: 1024px) {
+      .layout-container {
+        flex-direction: column;
+      }
+
+      .preview-area,
+      .settings-panel {
+        flex: none;
+        width: 100%;
+      }
+
+      .preview-area {
+        position: relative;
+        top: 0;
+        max-height: none;
+      }
+    }
+
+    .preview-phones {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      height: 100%;
+      padding: 0.75rem;
+    }
+
+    .phone-wrapper {
+      position: relative;
+    }
+
+    .phone-label {
+      text-align: center;
+      margin-top: 0.625rem;
+      font-size: 0.75rem;
+      color: #666;
+      transform: scale(1.25);
+      margin-bottom: -0.5rem;
+    }
+
+    .phone-frame {
+      width: 16.25rem;
+      height: 33.75rem;
+      background: #1a1a1a;
+      border-radius: 2rem 2rem 1.75rem 1.75rem;
+      padding: 0.5rem;
+      box-shadow: 
+        inset 0 0 0.625rem rgba(0,0,0,0.2),
+        0 1.25rem 2.5rem rgba(0,0,0,0.1);
+      position: relative;
+      border: 0.5rem solid #1a1a1a;
+    }
+
+    .phone-header {
+      height: 2.5rem;
+      position: relative;
+      margin-bottom: 0.3125rem;
+      background: #1a1a1a;
+      border-radius: 2rem 2rem 0 0;
+    }
+
+    .phone-notch {
+      width: 7.5rem;
+      height: 1.5625rem;
+      background: #1a1a1a;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 0 0 0.75rem 0.75rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .phone-notch::before {
+      content: '';
+      width: 0.5rem;
+      height: 0.5rem;
+      background: #333;
+      border-radius: 50%;
+      box-shadow: inset 0 0 0.125rem rgba(255,255,255,0.2);
+    }
+
+    .phone-notch::after {
+      content: '';
+      width: 2.5rem;
+      height: 0.25rem;
+      background: #333;
+      border-radius: 0.125rem;
+      box-shadow: inset 0 0 0.125rem rgba(255,255,255,0.2);
+    }
+
+    @media (max-width: 768px) {
+      .phone-frame {
+        width: 15rem;
+        height: 31.25rem;
+      }
+    }
+
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 1.25rem;
+      color: #fff;
+      font-size: 0.75rem;
+      height: 1.25rem;
+    }
+
+    .status-icons {
+      display: flex;
+      gap: 0.375rem;
+    }
+
+    .status-icons .material-symbols-outlined {
+      font-size: 0.875rem;
+    }
+
+    .phone-content {
+      height: calc(100% - 2.5rem);
+      background: #fff;
+      border-radius: 1.75rem;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .guest-chat {
+      position: relative;
+      height: 100%;
+      border-radius: 1.75rem;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+
+    .bg-filter {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .chat-header {
+      position: relative;
+      flex: 0 0 2.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: v-bind("design.primary_color");
+      border-radius: 1.75rem 1.75rem 0 0;
+    }
+
+    .chat-header h1 {
+      font-size: 1rem;
+      font-weight: normal;
+      margin: 0;
+      color: v-bind("design.header_text_color");
+      font-family: v-bind("design.font_family");
+    }
+
+    .chat-messages {
+      position: relative;
+      flex: 1;
+      padding: 0.875rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      background: transparent;
+    }
+
+    .bot-avatar {
+      width: 2rem;
+      height: 2rem;
+      background: v-bind('preview.icon_url ? `url("${preview.icon_url}")` : design.icon_url ? `url("/upload/${design.page_uid}/images/icon.jpg")` : "#FFFFFF"');
+      background-size: cover;
+      background-position: center;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .chat-message {
+      max-width: 80%;
+      font-size: 0.8125rem;
+      line-height: 1.5;
+      font-family: v-bind("design.font_family");
+    }
+
+    .chat-message.bot {
+      align-self: flex-start;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.375rem;
+    }
+
+    .message-content {
+      padding: 0.5rem 0.75rem;
+      word-break: break-word;
+      color: v-bind("design.message_text_color");
+    }
+
+    .chat-message.bot .message-content {
+      background: v-bind("design.bot_message_color");
+      color: v-bind("design.bot_text_color");
+      border-radius: 0.75rem;
+      border-top-left-radius: 0.125rem;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .chat-message.user {
+      align-self: flex-end;
+    }
+
+    .chat-message.user .message-content {
+      background: v-bind("design.user_message_color");
+      color: v-bind("design.user_text_color");
+      border-radius: 0.75rem;
+      border-top-right-radius: 0.125rem;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .guest-input {
+      position: relative;
+      flex: 0 0 3.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      background: rgba(255,255,255,0.95);
+      border-top: 1px solid rgba(0,0,0,0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .guest-input input {
+      flex: 1;
+      height: 2.25rem;
+      padding: 0 0.875rem;
+      border: 1px solid v-bind("design.secondary_color");
+      border-radius: 1.125rem;
+      font-size: 0.875rem;
+      font-family: v-bind("design.font_family");
+      background: #fff;
+      color: v-bind("design.message_text_color");
+    }
+
+    .guest-input input::placeholder {
+      color: rgba(0, 0, 0, 0.4);
+    }
+
+    .guest-input button {
+      width: 1.875rem;
+      height: 1.875rem;
+      border-radius: 50%;
+      background: v-bind("design.primary_color");
+      color: v-bind("design.header_text_color");
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      margin-right: 0;
+    }
+
+    .guest-input button .material-symbols-outlined {
+      font-size: 1rem;
+      color: inherit;
+    }
+
+    .guest-tabs {
+      position: relative;
+      flex: 0 0 3.25rem;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      background: v-bind("design.secondary_color");
+      border-radius: 0 0 1.75rem 1.75rem;
+      box-shadow: 0 -1px 2px rgba(0,0,0,0.1);
+    }
+
+    .tab-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+      color: rgba(255,255,255,0.6);
+      font-size: 0.625rem;
+      font-family: v-bind("design.font_family");
+      background: none;
+      border: none;
+      padding: 0.25rem 0;
+      transition: color 0.2s ease;
+    }
+
+    .tab-button.active {
+      color: v-bind("design.primary_color");
+    }
+
+    .tab-button .material-symbols-outlined {
+      font-size: 1.125rem;
+      color: inherit;
+    }
+
+    .color-palette {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .palette-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+      gap: 1rem;
+    }
+
+    .color-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .color-group label {
+      font-size: 0.75rem;
+      color: #666;
+    }
+
+    .color-picker {
+      display: flex;
+      align-items: center;
+      background: #f5f5f5;
+      border-radius: 0.75rem;
+      padding: 0.5rem;
+    }
+
+    .color-picker input[type="color"] {
+      width: 100%;
+      height: 2.75rem;
+      padding: 0;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      background: none;
+    }
+
+    .color-picker input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    .color-picker input[type="color"]::-webkit-color-swatch {
+      border: none;
+      border-radius: 0.5rem;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+    }
+
+    .image-preview {
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid #eee;
+    }
+
+    .image-preview h3 {
+      font-size: 0.875rem;
+      color: #333;
+      margin-bottom: 0.625rem;
+    }
+
+    .image-grid {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .image-item {
+      flex: 0 0 auto;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .image-item span {
+      font-size: 0.75rem;
+      color: #666;
+    }
+
+    .image-upload-area {
+      position: relative;
+      width: 7.5rem;
+      height: 7.5rem;
+      border: 2px dashed #ccc;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-size: cover;
+      background-position: center;
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+
+    .image-upload-area::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0);
+      transition: all 0.3s ease;
+    }
+
+    .image-upload-area:hover::before {
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .delete-image-button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 1.75rem;
+      height: 1.75rem;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      z-index: 2;
+      opacity: 0;
+      padding: 0;
+    }
+
+    .image-upload-area:hover .delete-image-button {
+      opacity: 1;
+    }
+
+    .delete-image-button:hover {
+      background: rgba(0, 0, 0, 0.7);
+    }
+
+    .delete-image-button .material-symbols-outlined {
+      font-size: 1.125rem;
+      width: 1.125rem;
+      height: 1.125rem;
+    }
+
+    .upload-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: #666;
+      transition: color 0.3s ease;
+    }
+
+    .image-upload-area:hover .upload-placeholder {
+      color: #2196F3;
+    }
+
+    .image-upload-area:hover .upload-placeholder .material-symbols-outlined {
+      font-size: 1.5rem;
+    }
+
+    .image-upload-area:hover .upload-placeholder span:not(.material-symbols-outlined) {
+      font-size: 0.75rem;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    .save-button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 14px;
+    }
+
+    .chat-header,
+    .chat-messages,
+    .guest-input,
+    .guest-tabs {
+      position: relative;
+      z-index: 1;
+    }
+    .filter-settings {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+      gap: 1rem;
+      margin: 1.25rem 0;
+      padding: 1.25rem 0;
+      border-top: 1px solid #eee;
+      border-bottom: 1px solid #eee;
+    }
+
+    .filter-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .filter-item label {
+      font-size: 0.75rem;
+      color: #666;
+    }
+
+    .filter-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .filter-controls input[type="color"] {
+      width: 2.5rem;
+      height: 2.5rem;
+      padding: 0;
+      border: none;
+      border-radius: 0.375rem;
+      background: none;
+    }
+
+    .filter-controls input[type="range"] {
+      flex: 1;
+    }
+
+    .filter-value {
+      font-size: 0.75rem;
+      color: #666;
+      min-width: 4rem;
+    }
+
+    .template-selector {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid #eee;
+    }
+
+    .template-selector h3 {
+      font-size: 0.875rem;
+      color: #333;
+      margin-bottom: 1rem;
+    }
+
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+      gap: 0.5rem;
+    }
+
+    .template-button {
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 0.5rem;
+      background: #fff;
+      color: #333;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .template-button:hover {
+      border-color: #2196F3;
+      background: #E3F2FD;
+    }
+
+    .template-button.active {
+      border-color: #2196F3;
+      background: #2196F3;
+      color: #fff;
+    }
+
+    .font-selector {
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid #eee;
+    }
+
+    .font-selector h3 {
+      font-size: 0.875rem;
+      color: #333;
+      margin-bottom: 0.75rem;
+    }
+
+    .font-select {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      color: #333;
+      background: #fff;
+    }
+
+    .font-select option {
+      padding: 0.5rem;
+    }
+
+    main {
+      padding-top: 0.75rem;
+    }
+
+    #side_navi ul li a {
+      display: block;
+      font-size: 14px;
+      color: #333;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+
+    #side_navi ul li a:hover {
+      color: #2196F3;
+    }
+  </style>
+
+  <script>
+    const app = Vue.createApp({
+        data() {
+            return {
+                design: <?php echo json_encode($design); ?>,
+                preview: {
+                    icon_url: null,
+                    background_url: null
+                },
+                templates: null,
+                availableFonts: [
+                    { name: 'Noto Sans JP', value: 'Noto Sans JP' },
+                    { name: 'M PLUS 1p', value: 'M PLUS 1p' },
+                    { name: 'Zen Kaku Gothic New', value: 'Zen Kaku Gothic New' },
+                    { name: 'BIZ UDPGothic', value: 'BIZ UDPGothic' }
+                ]
+            };
+        },
+        computed: {
+            effectiveIconUrl() {
+                return this.preview.icon_url || this.design.icon_url;
+            },
+            effectiveBackgroundUrl() {
+                return this.preview.background_url || this.design.background_url;
+            }
+        },
+        methods: {
+            triggerFileInput(type) {
+                this.$refs[`${type}Input`].click();
+            },
+            async handleImageUpload(type, event) {
+                const file = event.target.files[0];
+                if (!file) {
+                    console.log('ファイルが選択されていません');
+                    return;
+                }
+
+                // ファイルサイズチェック（5MB以下）
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('ファイルサイズは5MB以下にしてください');
+                    return;
+                }
+
+                // 画像タイプチェック
+                if (!file.type.startsWith('image/')) {
+                    alert('画像ファイルを選択してください');
+                    return;
+                }
+
+                try {
+                    // プレビュー用のURL生成
+                    const previewUrl = URL.createObjectURL(file);
+                    this.preview[`${type}_url`] = previewUrl;
+
+                    // アップロード処理
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    formData.append('type', type);
+                    formData.append('page_uid', this.design.page_uid);
+
+                    console.log('Uploading file:', {
+                        name: file.name,
+                        type: file.type,
+                        size: file.size,
+                        formType: type,
+                        pageUid: this.design.page_uid
+                    });
+
+                    const response = await axios.post('/api/design/upload-image.php', formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        },
+                        onUploadProgress: (progressEvent) => {
+                            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                            console.log('Upload progress:', percentCompleted + '%');
+                        }
+                    });
+                    
+                    console.log('Upload response:', response.data);
+                    
+                    if (response.data.success) {
+                        this.design[`${type}_url`] = true;
+                        console.log(`${type} 画像のアップロードに成功:`, response.data.url);
+                    } else {
+                        throw new Error(response.data.message || 'アップロードに失敗しました');
+                    }
+                } catch (error) {
+                    console.error('アップロードエラーの詳細:', error.response?.data || error);
+                    alert(`画像のアップロードに失敗しました: ${error.response?.data?.message || error.message}`);
+                    this.preview[`${type}_url`] = null;
+                    if (this.preview[`${type}_url`]) {
+                        URL.revokeObjectURL(this.preview[`${type}_url`]);
+                    }
+                }
+            },
+            async saveDesign() {
+                try {
+                    const response = await axios.post('/api/design/save_design.php', {
+                        design: this.design
+                    });
+                    
+                    if (response.data.success) {
+                        alert('デザイン設定を保存しました');
+                    } else {
+                        throw new Error(response.data.message || '保存に失敗しました');
+                    }
+                } catch (error) {
+                    console.error('保存エラー:', error);
+                    alert(error.response?.data?.message || '保存に失敗しました');
+                }
+            },
+            hexToRgba(hex, alpha) {
+                // hex: #RRGGBB
+                const r = parseInt(hex.slice(1, 3), 16);
+                const g = parseInt(hex.slice(3, 5), 16);
+                const b = parseInt(hex.slice(5, 7), 16);
+                return `rgba(${r},${g},${b},${alpha})`;
+            },
+            async loadTemplates() {
+                try {
+                    const response = await fetch('/dashboard/design/templates.json');
+                    this.templates = await response.json();
+                } catch (error) {
+                    console.error('テンプレートの読み込みに失敗しました:', error);
+                }
+            },
+            applyTemplate(template) {
+                // URLとフィルター設定を保持
+                const currentUrls = {
+                    icon_url: this.design.icon_url,
+                    background_url: this.design.background_url
+                };
+                const currentFont = this.design.font_family;
+
+                // テンプレートの設定を適用
+                Object.assign(this.design, template);
+
+                // 保持していた設定を戻す
+                this.design.icon_url = currentUrls.icon_url;
+                this.design.background_url = currentUrls.background_url;
+                this.design.font_family = currentFont;
+            },
+            isCurrentTemplate(template) {
+                return this.design.primary_color === template.primary_color &&
+                       this.design.secondary_color === template.secondary_color;
+            },
+            async deleteImage(type) {
+                try {
+                    const response = await axios.post('/api/design/delete-image.php', {
+                        type: type,
+                        page_uid: this.design.page_uid
+                    });
+                    
+                    if (response.data.success) {
+                        // プレビューと設定をクリア
+                        this.preview[`${type}_url`] = null;
+                        this.design[`${type}_url`] = false;
+                        if (this.preview[`${type}_url`]) {
+                            URL.revokeObjectURL(this.preview[`${type}_url`]);
+                        }
+                        console.log(`${type} 画像の削除に成功`);
+                    } else {
+                        throw new Error(response.data.message || '削除に失敗しました');
+                    }
+                } catch (error) {
+                    console.error('削除エラーの詳細:', error.response?.data || error);
+                    alert(`画像の削除に失敗しました: ${error.response?.data?.message || error.message}`);
+                }
+            },
+        },
+        watch: {
+            'preview.background_url': function(newVal) {
+                console.log('background_url プレビュー変更:', newVal ? newVal.substring(0, 100) + '...' : 'null');
+            },
+            'preview.icon_url': function(newVal) {
+                console.log('icon_url プレビュー変更:', newVal ? newVal.substring(0, 100) + '...' : 'null');
+            },
+            'design.background_url': function(newVal) {
+                console.log('background_url 本番変更:', newVal);
+            },
+            'design.icon_url': function(newVal) {
+                console.log('icon_url 本番変更:', newVal);
+            }
+        },
+        mounted() {
+            this.loadTemplates();
+            console.log('初期状態:', {
+                preview: this.preview,
+                design: this.design
+            });
+        }
+    }).mount('#app');
+  </script>
+</body>
+</html>

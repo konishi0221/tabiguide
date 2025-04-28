@@ -1,8 +1,9 @@
 <?php
+require_once __DIR__ . '/cros.php';    // ← 先頭に / を付ける
+
 require_once dirname(__DIR__) . '/public/core/config.php';
 require_once dirname(__DIR__) . '/public/core/db.php';
 header('Content-Type: application/json; charset=UTF-8');
-header('Access-Control-Allow-Origin: *');
 
 $fid  = $_GET['fid']  ?? null;
 $lang = $_GET['lang'] ?? 'ja';

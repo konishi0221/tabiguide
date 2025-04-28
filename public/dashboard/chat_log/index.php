@@ -140,7 +140,7 @@ foreach ($questionRows as $row) {
   <?php include(dirname(__DIR__) . '/components/dashboard_header.php'); ?>
   <div class="dashboard-container">
 
-<?php include('../components/side_navi.php'); ?>
+    <?php include(dirname(__DIR__) . '/components/side_navi.php'); ?>
 <?php
 foreach ($chats as $key => $chat) {
   $createdAt = strtotime($chat['created_at']);

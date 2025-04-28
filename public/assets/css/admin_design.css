@@ -5,11 +5,11 @@ body{
   margin:0;
   font-family:system-ui,sans-serif;
   color:#333;
-  background:#e0e0e0;
-  height:100vh;
-  display:flex;
+  background:whitesmoke;
+  min-height:100vh;
+  /* display:flex;
   flex-direction:column;
-  overflow:hidden;
+  overflow:hidden; */
 }
 .material-symbols-outlined{color:#000}
 
@@ -20,28 +20,48 @@ body{
   height:64px;
   background:#fff;
   border-bottom:1px solid #eee;
-  display:flex;align-items:center;justify-content:space-between;
+  display:flex;
+  align-items:center;justify-content:space-between;
   flex-shrink:0;z-index:1000;
 }
 .dashboard-container{display:flex;flex:1;height:calc(100vh - 64px);overflow:hidden;}
 
 #side_navi{
   width:240px;
-  padding:24px 10px;
-  box-sizing:border-box;overflow-y:auto;
+  padding:24px 0;
+  box-sizing:border-box;
+  overflow-y:auto;
   flex-shrink:0;
   transition:transform .25s ease;
 }
 
 /* メイン */
-#app{flex:1;overflow-y:auto;background:whitesmoke;padding:32px;box-sizing:border-box;}
-#app main{max-width:1000px;margin:0 auto;background:#fff;padding:20px;box-sizing:border-box;box-shadow:1px 0 4px rgba(0,0,0,.08)}
+#app{
+  flex:1;overflow-y:auto;
+  padding:32px;
+  box-sizing:
+  border-box;
+}
+#app main{
+  max-width:1000px;
+  margin:0 auto;
+  background:#fff;
+  padding:20px;
+  box-sizing:border-box;
+  box-shadow:1px 0 4px rgba(0,0,0,.08)
+}
+
+
 
 /* ==========================================
    20 COMPONENTS – 共通 UI パーツ
 ========================================== */
 /* ハンバーガー */
 .menu-btn{display:none;background:transparent;border:none;font-size:28px;padding:8px 16px;cursor:pointer;color:#333}
+
+
+
+
 
 /* CRUD 行 */
 .crud-item{
@@ -93,7 +113,9 @@ body{
 
 input[type=text],input[type=number],input[type=email],select,textarea{
   width:calc(100% - 20px);
-  max-width:500px;padding:10px;border:1px solid #ccc;border-radius:4px}
+  max-width:500px;padding:10px;border:1px solid #ccc;border-radius:4px;
+  font-size: 16px;
+}
 label{font-weight:600;display:block;
   margin-bottom:6px;
   margin-top: 30px
@@ -146,42 +168,136 @@ label{font-weight:600;display:block;
 .dashboard-header-search{display:flex;align-items:center;background:#f3f3f3;border-radius:8px;padding:4px 12px}
 .dashboard-header-search input{border:none;background:transparent;outline:none;padding:4px;width:200px}
 
-.dashboard-header-icons{display:flex;align-items:center;gap:8px;padding-right:12px}
-.dashboard-header-icons a{margin-left:10px}
+.facility-name{
+  text-align: left;
+  margin-left:20px;
+  font-weight:bold;
+  font-size:18px;
+  line-height:64px;
+  /* white-space:nowrap; */
+  color:#333;
+}
+
+.dashboard-header-icons{
+  display:flex;
+  align-items:
+  center;gap:8px;
+  padding-right:12px
+}
+.dashboard-header-icons a{
+  margin-left:10px;
+  overflow: hidden;
+
+}
 
 
 .smh_facility_name {
   display: none
 }
-
+.toBack {
+  display: none
+}
 @media(max-width:768px){
-  .dashboard-header {
-    position: relative;
-  }
-
-  .dashboard-header-logo{
-    border-right:0px;
-    position: absolute;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translateY(-50%) translateX(-50%);
-    -webkit-transform: translateY(-50%) translateX(-50%);
-  }
-  .dashboard-header-logo img{
-
-  }
-
-  .smh_facility_name {
+  div.dashboard-header {
     display: block;
-    text-align: center;
+    position: relative;
+    /* overflow: hidden; */
+    position: fixed;
     width: calc(100%);
-    /* color: white; */
-    background-color: white;
-    padding:6px  0;
+    box-sizing: border-box;
+    height: 50px;
+  }
+
+
+  div.header_padding {
+    height: 50px;
+    width: calc(100%);
+    display: block;
+  }
+
+
+  .dashboard-header-logo {
+    padding: 0;
     margin: 0;
-    border-bottom: solid 1px #dcdcdc;
-    box-shadow:1px 0 4px rgba(0,0,0,.08);
+    display:none;
+  }
+
+  .dashboard-header-icons{
+    display: block;
+    float:right;
+    align-items:center;
+    /* gap:8px; */
+    padding-right:12px;
+    top: 0;
+    height: 50px;
+    width: 90px
+  }
+
+  .user-icon{
+    width:32px;
+    margin-top: 10px;
+  }
+
+  .dashboard-header-icons .a {
+    /* background-color: red; */
+    display: inline-block;
+    width: 40px;
+    float: left;
+  }
+
+    .logout  {
+      /* height: 50px; */
+      display: inline-block;
+      float: right;
+      /* background-color: red; */
+      margin-top: 10px;
+      text-decoration: none
+    }
+    .logout span {
+      display: block;
+      padding: 5px;
+      text-align: center;
+    }
+
+
+  /* button .material-symbols-outlined {
+    height: 50px;
+  } */
+
+  .menu-btn,.toBack{
+    float: left;
+    display:inline-block;
+    /* line-height: 50px; */
+    height: 50px;
+    font-size:inherit;
+    text-align: center;
+    padding: 0;
+    width: 40px
+  }
+  .toBack {
+    /* line-height: 50px; */
+    display: block;
+    background-color: white;
+    text-decoration: none;
+    /* background-color: red */
+  }
+
+  .toBack span{
+    line-height: 50px;
+  }
+
+  .facility-name {
+    float: left;
+    display: block;
+    text-align: left;
+    width: calc(100% - 190px);
+    margin-left: 0;
+    height: 50px;
+    line-height: 50px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
   }
 }
 
@@ -192,18 +308,44 @@ label{font-weight:600;display:block;
 #side_navi h3:first-of-type{margin-top:0}
 #side_navi .h3_title{float:left;margin-left:10px}
 #side_navi .side_icon{float:left;line-height:35px}
-#side_navi ul{list-style:none;padding-left:25px;margin:0}
-#side_navi ul li{margin:6px 0}
-#side_navi ul li a{display:block;padding:6px 10px;font-size:14px;color:#333;text-decoration:none;border-radius:4px}
+#side_navi ul{
+  list-style:none;
+  padding-left:25px;
+  margin:0
+}
+#side_navi ul li{
+  margin:6px 0
+}
+#side_navi ul li a{
+  display:block;
+  font-size:14px;
+  color:#333;
+  text-decoration:none;
+  border-radius:4px;
+  padding:3px 20px 3px 48px
+}
 #side_navi ul li a:hover{background:#f0f0f0;color:#000}
 
 /* ボタン */
-button,.save-button{background:#007bff;color:#fff;padding:10px 20px;font-size:14px;border:none;border-radius:4px;cursor:pointer}
+button,.save-button{
+  background:#007bff;color:#fff;padding:10px 20px;font-size:14px;border:none;border-radius:4px;cursor:pointer}
 button:hover{opacity:.9}
 .save-button{margin-top:24px;}
 
 /* ユーザーアイコン */
-.user-icon{width:32px;height:32px;border-radius:50%;background:#007bff;color:#fff;font-size:14px;font-weight:bold;text-align:center;line-height:32px;cursor:pointer}
+.user-icon{
+  text-decoration: none;
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  background:#007bff;
+  color:#fff;
+  font-size:14px;
+  font-weight:bold;
+  text-align:center;
+  line-height:32px;
+  cursor:pointer,
+}
 
 /* プロフィールメニュー */
 .profile-menu{position:absolute;top:64px;right:24px;width:220px;background:#fff;border:1px solid #ddd;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,.1);padding:1em;z-index:999}
@@ -244,14 +386,20 @@ button:hover{opacity:.9}
 ========================================== */
 @media(max-width:768px){
   .dashboard-container{flex-direction:column}
-  .menu-btn{display:block}
 
   #side_navi{
-    position:fixed;top:64px;left:0;height:calc(100vh - 64px);
-    width:240px;max-width:80vw;transform:translateX(-100%);
-    box-shadow:2px 0 8px rgba(0,0,0,.15);z-index:1000;overflow-y:auto;
+    position:fixed;
     top:0;
-    height: 100vh;
+    left:0;
+    height:100vh;
+    width:240px;
+    max-width:80vw;
+    transform:translateX(-110%);
+    box-shadow:2px 0 8px rgba(0,0,0,.15);
+    z-index:1000;
+    overflow-y:scroll;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 100px;
   }
   #side_navi.open{transform:translateX(0)}
   body.menu-open{overflow:hidden}
@@ -264,15 +412,6 @@ button:hover{opacity:.9}
 /* ==========================================
    90 QUICK FIX – 個別パッチ (ここに追加)
 ========================================== */
-.facility-name{
-  margin-left:20px;font-weight:bold;font-size:18px;line-height:64px;white-space:nowrap;color:#333;
-}
-@media(max-width:768px){
-  .facility-name{
-    display: none
-  }
-
-}
 
 /* label 上書きを一括で保持 */
 label,.setting-section label,.form-section label{font-weight:600;margin-bottom:6px;color:#333}

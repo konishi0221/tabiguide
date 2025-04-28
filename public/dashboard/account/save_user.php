@@ -18,31 +18,42 @@ $base64 = null;
 if (isset($_FILES['icon']) && $_FILES['icon']['error'] === UPLOAD_ERR_OK) {
     $tmpPath = $_FILES['icon']['tmp_name'];
 
-    // 画像の読み込み
-    $image = imagecreatefromstring(file_get_contents($tmpPath));
-    if (!$image) {
-        die('画像の読み込みに失敗しました');
+    /* ① MIME 判定して GD の create 関数を選択 */
+    $mime = mime_content_type($tmpPath);
+    switch ($mime) {
+        case 'image/jpeg': $image = imagecreatefromjpeg($tmpPath); break;
+        case 'image/png' : $image = imagecreatefrompng ($tmpPath); break;
+        case 'image/gif' : $image = imagecreatefromgif ($tmpPath); break;
+        // case 'image/webp' : $image = imagecreatefromgif ($tmpPath); break;
+        default:
+            die('対応していない画像形式です');   // heic 等はエラー
     }
+    if (!$image) die('画像の読み込みに失敗しました');
 
-    // 元画像サイズ取得
-    $width = imagesx($image);
-    $height = imagesy($image);
+    /* ② 元サイズ取得＆中央正方形トリミング */
+    $w = imagesx($image);
+    $h = imagesy($image);
+    $side = min($w, $h);             // 正方形一辺
+    $srcX = intval(($w - $side) / 2); // 中央寄せ
+    $srcY = intval(($h - $side) / 2);
 
-    // 正方形にリサイズ（150px x 150px）
-    $newSize = 150;
-    $resized = imagecreatetruecolor($newSize, $newSize);
+    /* ③ 150×150 にリサンプル */
+    $dst = imagecreatetruecolor(150, 150);
     imagecopyresampled(
-        $resized, $image,
-        0, 0, 0, 0,
-        $newSize, $newSize,
-        $width, $height
+        $dst, $image,
+        0, 0,            // dst x,y
+        $srcX, $srcY,    // src x,y
+        150, 150,        // dst w,h
+        $side, $side     // src w,h
     );
 
-    // PNGとして出力＆base64変換
+    /* ④ PNG に統一 & base64 */
     ob_start();
-    imagepng($resized);
-    $imageData = ob_get_clean();
-    $base64 = base64_encode($imageData);
+    imagepng($dst);
+    $base64 = base64_encode(ob_get_clean());
+
+    imagedestroy($image);
+    imagedestroy($dst);
 }
 
 // SQL作成（icon_base64がある場合のみ更新）

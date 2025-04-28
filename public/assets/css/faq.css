@@ -1,0 +1,168 @@
+
+.faq-item-wrap {
+  border-bottom: 1px solid #dcdcdc;
+}
+
+.faq-item-wrap:last-child {
+  border-bottom: none;
+}
+
+.faq-item-wrap.edit {
+  background: whitesmoke;
+}
+
+.faq-item {
+  position: relative;
+  padding: 14px 0px 14px 40px;
+}
+
+
+ .q {
+  font-weight: 700;
+  margin-bottom: 6px;
+  width: calc(100% - 200px)
+}
+
+.editing_text {
+  font-weight:bold;
+  line-height: 25px;
+  vertical-align: middle;
+}
+
+.icon-btn {
+  padding: 0;
+  position: absolute;
+  /* top: 14px; */
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  /* background-color: red; */
+  vertical-align: middle;
+  /* line-height: 24px; */
+  display: inline-flex;      /* ← 他の .icon-btn も崩さずに済む */
+  align-items: center;       /* 縦位置を中央でそろえる */
+  gap: 4px;                  /* アイコンと文字の間隔 */
+}
+
+.icon-star {
+  left: 8px;
+  color: #dcdcdc;
+}
+
+.icon-star.pinned {
+  color: #f5b301;
+}
+
+.icon-del {
+  right: 0px;
+  color: #555;
+}
+
+.icon-arch {
+  /* top:45px; */
+  right: 75px;
+  color: #555;
+}
+
+.icon-save {
+  right: 8px;
+  color: white;
+  background-color: #1976d2;
+  padding: 5px;
+}
+
+.icon_label {
+  display: inline-block;
+  line-height: 14px;
+}
+
+@media(max-width:768px){
+  .q {
+    width: calc(100% - 70px);
+  }
+
+  .icon_label {
+    display: none;
+    line-height: 14px;
+  }
+  .icon-arch {
+    /* top:45px; */
+    right: 35px;
+  }
+  .icon-save {
+    right: 8px;
+
+  }
+
+  .save_icon_label {
+    display: inline-block;
+  }
+}
+
+.faq-item .question-box,
+.faq-item .answer-box,
+.faq-item .tag-box {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: calc(100% - 10px);
+  border: solid 1px #dcdcdc;
+  outline: none;
+  font-size: 16px;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+.faq-item .question-box {
+  margin-top: 20px
+}
+
+.faq-item .answer-box {
+}
+.faq-item .tag-box {
+  padding: 10px;
+}
+
+/* 新規モーダル */
+.modal-mask {
+  /* display: none; */
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .4);
+  z-index: 1000;
+}
+
+.modal-body {
+  box-sizing: border-box;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width:  calc(100% - 40px);
+  max-width: 480px;
+  background: #fff;
+  border-radius: 5px;
+  /* border: 1px solid #888; */
+  padding: 24px;
+  /* display: none; */
+}
+
+.modal-body h3 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+}
+
+.modal-body textarea,
+.modal-body input {
+  width: 100%;
+  color: black;
+  /* border: 1px solid #ccc; */
+  margin-bottom: 12px;
+  padding: 6px;
+}
+
+.modal-body .btn-row {
+  text-align: right;
+}
+
+.modal-body button {
+  margin-left: 8px;
+}

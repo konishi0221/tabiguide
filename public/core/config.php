@@ -1,25 +1,54 @@
 <?php
-function getEnvVar($key) {
-    $envPath = __DIR__ . '/.env';
-    if (!file_exists($envPath)) return null;
-
-    $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach ($lines as $line) {
-        if (strpos($line, $key) === 0) {
-            list(, $value) = explode("=", $line, 2);
-            return trim($value);
-        }
-    }
-    return null;
-}
+/* ======================================================================
+   config.php  ― 設定ファイル
+   ====================================================================== */
 
 
-$GOOGLE_MAPS_API_KEY = getEnvVar('GOOGLE_MAPS_API_KEY');
-$openai_key = getEnvVar('OPENAI_KEY');
+// DB設定
+// define('DB_HOST', 'localhost');
+// define('DB_NAME', 'tabiguide');
+// define('DB_USER', 'root');
+// define('DB_PASS', '');
+
+// // OpenAI API設定
+// define('OPENAI_API_KEY', '');
+
+// // CORS設定
+// header('Access-Control-Allow-Origin: *');
+// header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+// header('Access-Control-Allow-Headers: Content-Type');
+
+// if (!defined('BASE_PATH')) {
+//     define('BASE_PATH', dirname(__DIR__));
+// }
+
+
+
+/* config.php の先頭に追加 */
+// foreach (['.env', '.env.prod'] as $f) {
+//     $p = __DIR__."/{$f}";
+//     if (!is_file($p)) continue;
+//     foreach (file($p, FILE_IGNORE_NEW_LINES) as $l) {
+//         if ($l === '' || $l[0] === '#') continue;
+//         putenv($l);                // KEY=VAL をそのまま export
+//     }
+// }
+
+
+define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
+define('DB_NAME', getenv('DB_NAME') ?: 'tabiguide');
+define('DB_USER', getenv('DB_USER') ?: 'root');
+define('DB_PASS', getenv('DB_PASS') ?: '');
+
+define('OPENAI_API_KEY', getenv('OPENAI_API_KEY') ?: '');
+
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
 
 if (!defined('BASE_PATH')) {
     define('BASE_PATH', dirname(__DIR__));
 }
-if (!defined('OPENAI_API_KEY')) {
-  define('OPENAI_API_KEY', getEnvVar('OPENAI_KEY'));
-}
+
+define('GOOGLE_MAPS_API_KEY', getenv('GOOGLE_MAPS_API_KEY') ?: '');
+$GOOGLE_MAPS_API_KEY = GOOGLE_MAPS_API_KEY;   // 変数でも使いたい場合

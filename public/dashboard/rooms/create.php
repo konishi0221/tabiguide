@@ -80,8 +80,8 @@ foreach ($room_template['客室設備・アメニティ'] ?? [] as $key => $sche
 
         <hr>
 
-        <textarea name="amenities_data_json" :value="JSON.stringify(form)" hidden></textarea>
-        <!-- <input type="hidden" name="amenities_data_json" :value="JSON.stringify(form)"> -->
+        <!-- <textarea name="amenities_data_json" :value="JSON.stringify(form)" class="none" ></textarea> -->
+        <input type="hidden" name="amenities_data_json" :value="JSON.stringify(form)">
 
         <h2>設備・アメニティ</h2>
         <div v-if="template['客室設備・アメニティ']">

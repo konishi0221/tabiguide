@@ -1,68 +1,98 @@
 <?php
-require_once dirname(__DIR__) . '/../core/dashboard_head.php';
+require_once dirname(__DIR__) . '/../core/dashboard_head.php';   // $pdo (ERRMODE_EXCEPTION 推奨)
 
-function generateUid($length = 8) {
-    return substr(bin2hex(random_bytes($length)), 0, $length);
+/* ---------- 共通関数 ---------- */
+function generateUid(int $len = 8): string
+{
+    return substr(bin2hex(random_bytes($len)), 0, $len);
 }
 
-$mode = $_POST['mode'] ?? null;
-$facility_uid = $_POST['facility_uid'] ?? null;
-$page_uid = $_POST['page_uid'] ?? null;
+/* ---------- POST 受信 ---------- */
+$mode           = $_POST['mode']           ?? null;
+$facility_uid   = $_POST['facility_uid']   ?? null;
+$id             = $_POST['id']             ?? null;
+$name           = trim($_POST['name']      ?? '');
+$en_name        = urldecode(base64_decode($_POST['en_name'] ?? ''));
+$category       = $_POST['category']       ?? null;
+$lat            = floatval($_POST['lat']   ?? 35.711892);
+$lng            = floatval($_POST['lng']   ?? 139.857269);
+$description    = trim($_POST['description'] ?? '');
+$en_description = urldecode(base64_decode($_POST['en_description'] ?? ''));
+$is_visible     = intval($_POST['is_visible'] ?? 1);
+$uid            = $_POST['uid'] ?: generateUid(8);
+$url            = urldecode(base64_decode($_POST['url'] ?? ''));
 
-if (!in_array($mode, ['insert', 'update'])) {
-    echo "不正なアクセスです。";
-    exit;
-}
+/* ---------- 画像準備 ---------- */
+/* 保存先: /workspace/public/upload/{facility_uid}/stores/{uid}.jpg */
+$uploadDir = $_SERVER['DOCUMENT_ROOT'] . "/upload/{$facility_uid}/stores/";
+$imagePath = $uploadDir . $uid . '.jpg';
+$hasUpload = !empty($_FILES['image']['tmp_name']);
 
-// 入力値の取得と整形
-$id = $_POST['id'] ?? null;
-$name = isset($_POST['name']) ? trim($_POST['name']) : '';
-$en_name = isset($_POST['en_name']) ? urldecode(base64_decode(trim($_POST['en_name']))) : '';
-$category_id = isset($_POST['category_id']) && $_POST['category_id'] !== '' ? intval($_POST['category_id']) : null;
-$category = isset($_POST['category']) && $_POST['category'] !== '' ? $_POST['category'] : null;
-$lat = isset($_POST['lat']) ? floatval($_POST['lat']) : 35.711892;
-$lng = isset($_POST['lng']) ? floatval($_POST['lng']) : 139.857269;
-$description = isset($_POST['description']) ? trim($_POST['description']) : '';
-$encoded = $_POST['en_description'] ?? '';
-$en_description = urldecode(base64_decode($encoded));
-$is_visible = isset($_POST['is_visible']) ? intval($_POST['is_visible']) : 1;
-$uid = isset($_POST['uid']) && !empty($_POST['uid']) ? $_POST['uid'] : generateUid(8);
-$url = isset($_POST['url']) ? urldecode(base64_decode(trim($_POST['url']))) : '';
+try {
+    $pdo->beginTransaction();
 
-// 画像アップロード処理（upload/page_uid/stores/uid.jpg に保存）
-$uploadDir = dirname(__DIR__) . "/../upload/{$facility_uid}/stores/";
-if (!is_dir($uploadDir)) {
-    mkdir($uploadDir, 0777, true);
-}
-if (!empty($_FILES['image']['tmp_name'])) {
-    $filePath = $uploadDir . $uid . ".jpg";
-    $imageType = exif_imagetype($_FILES['image']['tmp_name']);
+    /* 画像アップロード処理 */
+    if ($hasUpload) {
 
-    if ($imageType === IMAGETYPE_JPEG || $imageType === IMAGETYPE_PNG) {
-        if (move_uploaded_file($_FILES['image']['tmp_name'], $filePath)) {
-            chmod($filePath, 0644);
-        } else {
-            error_log("画像の保存に失敗しました: " . $filePath);
+        /* ディレクトリ確保 */
+        if (!is_dir($uploadDir) && !mkdir($uploadDir, 0777, true)) {
+            throw new RuntimeException("mkdir failed: {$uploadDir}");
         }
-    } else {
-        error_log("対応していない画像形式: " . $_FILES['image']['type']);
+
+        /* 画像形式チェック (JPG / PNG のみ) */
+        $mime = mime_content_type($_FILES['image']['tmp_name']);
+        if (!in_array($mime, ['image/jpeg', 'image/png'], true)) {
+            throw new RuntimeException('unsupported image type');
+        }
+
+        /* 一時ファイルから移動 */
+        if (!move_uploaded_file($_FILES['image']['tmp_name'], $imagePath)) {
+            throw new RuntimeException('image move failed');
+        }
+        chmod($imagePath, 0644);
     }
-}
 
-// `insert` or `update` の処理
-if ($mode === 'update' && $id) {
-    $stmt = $mysqli->prepare("UPDATE stores SET name=?, category=?, lat=?, lng=?, description=?, is_visible=?, url=?, uid=?, en_name=?, en_description=?, facility_uid=? WHERE id=?");
-    $stmt->bind_param("ssddsisssssi", $name, $category, $lat, $lng, $description, $is_visible, $url, $uid, $en_name, $en_description, $facility_uid, $id);
-} else {
-    $stmt = $mysqli->prepare("INSERT INTO stores (name, category, lat, lng, description, is_visible, url, uid, en_name, en_description, facility_uid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("ssddsisssss", $name, $category, $lat, $lng, $description, $is_visible, $url, $uid, $en_name, $en_description, $facility_uid);
-}
+    /* ---------- DB 保存 ---------- */
+    $params = [
+        ':name'            => $name,
+        ':category'        => $category,
+        ':lat'             => $lat,
+        ':lng'             => $lng,
+        ':description'     => $description,
+        ':is_visible'      => $is_visible,
+        ':url'             => $url,
+        ':uid'             => $uid,
+        ':en_name'         => $en_name,
+        ':en_description'  => $en_description,
+        ':facility_uid'    => $facility_uid
+    ];
 
-if ($stmt->execute()) {
-    header("Location: list.php?success=1&page_uid=" . $facility_uid);
-    exit();
-} else {
-    error_log("データベースエラー: " . $stmt->error);
-    header("Location: list.php?success=1&page_uid=" . $facility_uid);
-    exit();
+    if ($mode === 'update' && $id) {
+        /* 更新 */
+        $sql = "UPDATE stores SET
+                  name=:name, category=:category, lat=:lat, lng=:lng,
+                  description=:description, is_visible=:is_visible,
+                  url=:url, uid=:uid, en_name=:en_name,
+                  en_description=:en_description, facility_uid=:facility_uid
+                WHERE id=:id";
+        $params[':id'] = $id;
+    } else {
+        /* 新規 */
+        $sql = "INSERT INTO stores
+                  (name, category, lat, lng, description, is_visible,
+                   url, uid, en_name, en_description, facility_uid)
+                VALUES
+                  (:name, :category, :lat, :lng, :description, :is_visible,
+                   :url, :uid, :en_name, :en_description, :facility_uid)";
+    }
+
+    $pdo->prepare($sql)->execute($params);
+    $pdo->commit();
+    header("Location: list.php?success=1&page_uid={$facility_uid}");
+} catch (Throwable $e) {
+    if ($pdo->inTransaction()) $pdo->rollBack();
+    if ($hasUpload && is_file($imagePath)) unlink($imagePath);          // 巻き戻し
+    error_log($e->getMessage());
+    header("Location: list.php?error=1&page_uid={$facility_uid}");
 }
+exit;

@@ -25,21 +25,24 @@ if ($page_uid) {
 
 <div class="dashboard-header" id="header">
 
-  <button id="sideToggle" class="menu-btn">
+  <button id="sideToggle" class="menu-btn ">
     <span class="material-symbols-outlined">menu</span>
   </button>
 
+  <a href="/dashboard/" class=" toBack">
+    <span class="material-symbols-outlined">arrow_back_ios</span>
+  </a>
 
-  <div class="dashboard-header-left">
+
     <div class="dashboard-header-logo">
       <a href="/dashboard/">
         <img src="/assets/images/cms_logo.png" alt="logo">
       </a>
     </div>
 
-    <span class="facility-name"><?= htmlspecialchars($facility_name ?? '') ?></span> <!-- ← ここ追加 -->
-  </div>
-  <div></div>
+    <div class="facility-name">
+      <?= htmlspecialchars($facility_name ?? '') ?></div> <!-- ← ここ追加 -->
+
   <div class="dashboard-header-icons">
 
     <a href="/dashboard/account/">
@@ -54,10 +57,9 @@ if ($page_uid) {
       <span class="material-symbols-outlined">notifications</span>
     </a> -->
 
-    <a href="/logout/">
+    <a href="/logout/" class="logout">
       <span class="material-symbols-outlined">logout</span>
     </a>
   </div>
 </div>
-
-<p class="smh_facility_name"><?= htmlspecialchars($facility_name ?? '') ?></p> <!-- ← ここ追加 -->
+<div class="header_padding"></div>

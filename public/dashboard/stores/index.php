@@ -29,7 +29,6 @@ if ($page_uid) {
     }
 }
 
-
 // 初期データ
 $store = [
     'id' => '',
@@ -48,14 +47,13 @@ $store = [
 
 // 編集時の処理
 if (!empty($_GET['id'])) {
-    $stmt = $mysqli->prepare("SELECT * FROM stores WHERE id = ?");
-    $stmt->bind_param("i", $_GET['id']);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $store = $result->fetch_assoc() ?: $store; // データが取得できなかった場合、デフォルト値を使用
+    $stmt = $pdo->prepare("SELECT * FROM stores WHERE id = :id");
+    $stmt->execute([':id' => (int)$_GET['id']]);
+    $data = $stmt->fetch(PDO::FETCH_ASSOC);
+    $store = $data ?: $store; // データが取得できなかった場合、元の $store を使用
 }
 
-// dd( $store["id"])
+// dd( $_SERVER['DOCUMENT_ROOT'])
 ?>
 
 <!DOCTYPE html>
@@ -73,7 +71,7 @@ if (!empty($_GET['id'])) {
   <?php include(dirname(__DIR__) . '/components/dashboard_header.php'); ?>
 
   <div class="dashboard-container">
-  <?php include('../components/side_navi.php'); ?>
+    <?php include(dirname(__DIR__) . '/components/side_navi.php'); ?>
     <div id="app">
       <main>
         <h1>店舗編集</h1>
@@ -87,11 +85,11 @@ if (!empty($_GET['id'])) {
             <input type="hidden" name="facility_uid" v-model="facility_uid" >
 
             <p><label>店舗名: </label><input type="text" name="name" v-model="name"> <span @click="translate('name')" >翻訳</span></p>
-            <p>
+            <!-- <p>
               <label>店舗名(英語): </label>
               <input type="text" v-model="en_name" @input="encodeForPost(en_name, 'en_name_encoded')">
               <input type="hidden" name="en_name" :value="en_name_encoded">
-            </p>
+            </p> -->
             <p><label>カテゴリ:</label>
                 <select name="category" v-model="category">
                     <?php foreach ($category_list as $category) { ?>
@@ -101,7 +99,6 @@ if (!empty($_GET['id'])) {
             </p>
 
             <meta name="robots" content="noindex, nofollow">
-
             <p>
               <label>URL:</label>
               <input type="text" v-model="url" @input="encodeForPost(url, 'url_encoded')">
@@ -110,11 +107,11 @@ if (!empty($_GET['id'])) {
 
 
             <p><label>説明: </label><textarea name="description" v-model="description"></textarea>  <span @click="translate('description')" >翻訳</span></p>
-            <p>
+            <!-- <p>
               <label>説明(英語): </label>
               <textarea v-model="en_description" @input="encodeForPost(en_description, 'en_description_encoded')"></textarea>
               <input type="hidden" name="en_description" :value="en_description_encoded">
-            </p>
+            </p> -->
 
             <p><label>緯度: </label>{{ lat }} <input type="hidden" name="lat" v-model="lat"></p>
             <p><label>経度: </label>{{ lng }} <input type="hidden" name="lng" v-model="lng"></p>
@@ -140,11 +137,9 @@ if (!empty($_GET['id'])) {
           <br>
           <br>
           <div id="image-preview" v-if="uid">
-            <img
-              :src="src"
-              alt="店舗画像"
-              width="100"
-            />
+            <img :src="src"
+                 alt="店舗画像"
+                 onerror="this.onerror=null;this.src='/assets/images/no_image.png';">
             <br><br>
 
             <form action="delete_store.php" method="POST">
@@ -159,6 +154,15 @@ if (!empty($_GET['id'])) {
       </main>
     </div>
   </div>
+
+  <style>
+    #image-preview img {
+      width: calc(200px);
+      border-radius: 5px;
+      border: solid 1px #b6b6b6;
+    }
+  </style>
+
     <script>
     const app = Vue.createApp({
         data() {

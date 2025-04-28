@@ -5,6 +5,7 @@ vendor/
 # Environment variable files
 .env
 core/.env
+*.env
 
 # IDE/editor folders
 .vscode/

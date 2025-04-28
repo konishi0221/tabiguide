@@ -63,10 +63,10 @@ foreach ($ownerFacilities as $f) {
   <button class="new-button" @click="showModal = true">＋ 新規作成</button>
 
   <h1>管理中の施設</h1>
-
   <div v-if="facilities.length === 0">
     <p>現在、管理中の施設はありません。</p>
   </div>
+
 
   <div class="card-grid" v-else>
     <div

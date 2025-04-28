@@ -60,10 +60,10 @@ $placeholders = [
 
 
 <body>
-<?php include(dirname(__DIR__) . '/components/dashboard_header.php'); ?>
+  <?php include(dirname(__DIR__) . '/components/dashboard_header.php'); ?>
 <div class="dashboard-container">
 
-<?php include('../components/side_navi.php'); ?>
+  <?php include(dirname(__DIR__) . '/components/side_navi.php'); ?>
 
 <div id="app">
 <main>

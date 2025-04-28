@@ -12,6 +12,7 @@ $user = $_SESSION['user'];
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/admin_layout.css">
   <link rel="stylesheet" href="/assets/css/admin_design.css">
+  <link rel="stylesheet" href="/assets/css/dashboard.css">
   <style>
   .account-container {
     max-width: 600px;

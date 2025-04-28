@@ -7,12 +7,12 @@
     返り値
       {"page_uid":"...","chat_charactor":"...","chat_first_message":"..."}
     ────────────────────────────────────────── */
+    require_once __DIR__ . '/cros.php';    // ← 先頭に / を付ける
 
     require_once dirname(__DIR__) . '/public/core/config.php';
     require_once dirname(__DIR__) . '/public/core/db.php';
 
 header('Content-Type: application/json; charset=UTF-8');
-header('Access-Control-Allow-Origin: *');   // dev 用 CORS
 
 $pageUid = $_GET['page_uid'] ?? '';
 if ($pageUid === '') {

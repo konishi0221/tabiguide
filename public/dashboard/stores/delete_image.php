@@ -27,5 +27,5 @@ if (!empty($_POST['id'])) {
 }
 
 $stmt->execute();
-header("Location: list.php");
+// header("Location: list.php");
 exit();

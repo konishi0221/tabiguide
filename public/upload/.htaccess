@@ -1,0 +1,10 @@
+# /public/upload/.htaccess  ── 画像直リンク用 CORS
+<IfModule mod_headers.c>
+    <FilesMatch "\.(jpe?g|png|gif|webp|svg)$">
+        Header always set Access-Control-Allow-Origin "*"
+        Header always set Access-Control-Allow-Methods "GET,HEAD"
+        Header always set Access-Control-Allow-Headers "Content-Type"
+    </FilesMatch>
+</IfModule>
+
+# アップロード以外のファイルは従来の設定が優先されます
