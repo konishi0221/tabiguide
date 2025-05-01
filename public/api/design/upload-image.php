@@ -159,23 +159,62 @@ try {
         $transparent = imagecolorallocatealpha($new_image, 0, 0, 0, 127);
         imagefilledrectangle($new_image, 0, 0, $dst_size, $dst_size, $transparent);
     
-        // 元画像を 200px 正方形内にフィット（余白は透明）
-        $ratio = min($dst_size / $width, $dst_size / $height);
-        $new_width  = (int)($width  * $ratio);
-        $new_height = (int)($height * $ratio);
-        $dst_x = (int)(($dst_size - $new_width)  / 2);
-        $dst_y = (int)(($dst_size - $new_height) / 2);
+        // 元画像のアスペクト比を維持しながら、短辺が200px以上になるようにリサイズ
+        if ($width / $height > 1) {  // 横長画像
+            $temp_height = $dst_size;
+            $temp_width = (int)($width * ($dst_size / $height));
+        } else {  // 縦長画像または正方形
+            $temp_width = $dst_size;
+            $temp_height = (int)($height * ($dst_size / $width));
+        }
+
+        // 中心部分の座標を計算
+        $src_x = (int)(($temp_width - $dst_size) / 2);
+        $src_y = (int)(($temp_height - $dst_size) / 2);
     
+        // 一時的な画像を作成
+        $temp_image = imagecreatetruecolor($temp_width, $temp_height);
+        
+        // 一時画像の透明度を設定
+        imagealphablending($temp_image, false);
+        imagesavealpha($temp_image, true);
+        $transparent = imagecolorallocatealpha($temp_image, 0, 0, 0, 127);
+        imagefilledrectangle($temp_image, 0, 0, $temp_width, $temp_height, $transparent);
+        
+        // 元画像を一時的な画像にリサイズ
         imagecopyresampled(
-            $new_image, $source_image,
-            $dst_x, $dst_y,            // キャンバス側の描画開始位置（中央寄せ）
+            $temp_image, $source_image,
             0, 0,
-            $new_width, $new_height,   // リサイズ後
-            $width, $height            // 元サイズ
+            0, 0,
+            $temp_width, $temp_height,
+            $width, $height
+        );
+        
+        // 中心部分を切り取って最終的な画像に配置
+        imagecopyresampled(
+            $new_image, $temp_image,
+            0, 0,                    // 出力先の座標
+            $src_x, $src_y,         // 入力元の座標（中心部分）
+            $dst_size, $dst_size,   // 出力先のサイズ
+            $dst_size, $dst_size    // 入力元から取得するサイズ
         );
     
+        // 一時的な画像を破棄
+        imagedestroy($temp_image);
+        
         imagepng($new_image, $filepath, 9);
-        } else {
+        
+        // リソースの解放
+        imagedestroy($source_image);
+        imagedestroy($new_image);
+
+        // 成功レスポンス
+        echo json_encode([
+            'success' => true,
+            'url' => "/upload/{$page_uid}/images/{$filename}"
+        ]);
+        exit;  // アイコン処理完了後は終了
+    } else {
         // 他の画像は従来通り
         $max_size = 1200;
         if ($width > $max_size || $height > $max_size) {
