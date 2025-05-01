@@ -31,7 +31,7 @@ $page_uid = $data['page_uid'];
 // ファイルパスの設定
 $base_dir = $_SERVER['DOCUMENT_ROOT'];
 $relative_dir = "/upload/" . $page_uid . "/images";
-$filepath = $base_dir . $relative_dir . '/' . $type . '.jpg';
+$filepath = $base_dir . $relative_dir . '/' . $type . '.png';
 
 error_log("Delete path details:");
 error_log("File path: " . $filepath);

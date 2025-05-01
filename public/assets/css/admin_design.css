@@ -6,7 +6,7 @@ body{
   font-family:system-ui,sans-serif;
   color:#333;
   background:whitesmoke;
-  min-height:100vh;
+  min-height:100dvh;
   /* display:flex;
   flex-direction:column;
   overflow:hidden; */
@@ -24,7 +24,11 @@ body{
   align-items:center;justify-content:space-between;
   flex-shrink:0;z-index:1000;
 }
-.dashboard-container{display:flex;flex:1;height:calc(100vh - 64px);overflow:hidden;}
+.dashboard-container{
+  display:flex;flex:1;
+  height:calc(100dvh);
+  overflow:scroll;
+}
 
 #side_navi{
   width:240px;
@@ -51,7 +55,22 @@ body{
   box-shadow:1px 0 4px rgba(0,0,0,.08)
 }
 
+a {
+  all: unset;        /* 継承も含めて一旦ぜんぶ無効化 */
+  cursor: pointer;   /* ポインタ形状だけ戻す（お好みで） */
+}
 
+/* ❷ 文字色・下線だけ消したい場合 */
+a {
+  color: inherit;    /* 現在のテキスト色を継承 */
+  text-decoration: none;
+}
+
+/* ❸ :hover / :focus で何かしら付けたい場合は追記 */
+a:hover,
+a:focus-visible {
+  text-decoration: underline;
+}
 
 /* ==========================================
    20 COMPONENTS – 共通 UI パーツ
@@ -272,12 +291,12 @@ label{font-weight:600;display:block;
     font-size:inherit;
     text-align: center;
     padding: 0;
-    width: 40px
+    width: 40px;
+    background-color: initial;
   }
   .toBack {
     /* line-height: 50px; */
     display: block;
-    background-color: white;
     text-decoration: none;
     /* background-color: red */
   }
@@ -391,7 +410,7 @@ button:hover{opacity:.9}
     position:fixed;
     top:0;
     left:0;
-    height:100vh;
+    height:100dvh;
     width:240px;
     max-width:80vw;
     transform:translateX(-110%);
@@ -399,7 +418,7 @@ button:hover{opacity:.9}
     z-index:1000;
     overflow-y:scroll;
     -webkit-overflow-scrolling: touch;
-    padding-bottom: 100px;
+    /* padding-bottom: 100px; */
   }
   #side_navi.open{transform:translateX(0)}
   body.menu-open{overflow:hidden}

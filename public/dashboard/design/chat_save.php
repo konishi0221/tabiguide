@@ -36,5 +36,5 @@ $stmt->execute([
 ]);
 
 /* ---------- 完了後リダイレクト ---------- */
-header("Location: index.php?page_uid={$pageUid}&saved=1");
+header("Location: chat.php?page_uid={$pageUid}&saved=1");
 exit;

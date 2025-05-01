@@ -29,9 +29,6 @@ if ($page_uid) {
     <span class="material-symbols-outlined">menu</span>
   </button>
 
-  <a href="/dashboard/" class=" toBack">
-    <span class="material-symbols-outlined">arrow_back_ios</span>
-  </a>
 
 
     <div class="dashboard-header-logo">

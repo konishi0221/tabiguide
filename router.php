@@ -25,6 +25,10 @@ if (str_starts_with($uri, '/api/')) {
     is_file($api) ? require $api : http_response_code(404);
     exit;
 }
+if (str_starts_with($uri, '/upload/')) {
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: GET,HEAD,OPTIONS');
+}
 
 /* 4. それ以外は共通入口 */
 require $public.'/index.php';

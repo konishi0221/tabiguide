@@ -69,24 +69,27 @@ foreach ($ownerFacilities as $f) {
 
 
   <div class="card-grid" v-else>
-    <div
-      class="card"
-      :class="f._role"
-      v-for="f in facilities"
-      :key="f.page_uid">
-      <div class="icon-circle"
-      :style="{ backgroundColor: f.primary_color || '#ccc' }"
-      >
-        <img v-if="f.logo_base64" :src="'data:image/png;base64,' + f.logo_base64" alt="icon">
-      </div>
-      <h3>
-        {{ f.name }}
-        <span class="role-tag" v-if="f._role === 'owner'">オーナー</span>
-        <span class="role-tag" v-else-if="f._role === 'manager'">共同管理者</span>
-        <span class="role-tag" v-else>スタッフ</span>
-      </h3>
-      <p>ID: {{ f.page_uid }}</p>
-      <a :href="'/dashboard/ai/base.php?page_uid=' + f.page_uid">この施設を管理する</a>
+      
+    <div v-for="f in facilities" :key="f.page_uid" >
+      <a :href="'/dashboard/ai/base.php?page_uid=' + f.page_uid">
+        <div
+          class="card"
+          :class="f._role">
+          <div class="icon-circle"
+          :style="{ backgroundColor: f.primary_color || '#ccc' }"
+          >
+            <img :src=" '/upload/' +  f.page_uid + '/images/icon.png' " alt="icon"  onerror="this.src='/assets/images/icon_no_image.jpg'"  >
+          </div>
+          <h3>
+            {{ f.name }}
+            <span class="role-tag" v-if="f._role === 'owner'">オーナー</span>
+            <span class="role-tag" v-else-if="f._role === 'manager'">共同管理者</span>
+            <span class="role-tag" v-else>スタッフ</span>
+          </h3>
+          <p>ID: {{ f.page_uid }}</p>
+          <a :href="'/dashboard/ai/base.php?page_uid=' + f.page_uid">この施設を管理する</a>
+        </div>
+      </a>
     </div>
   </div>
 
@@ -96,30 +99,6 @@ foreach ($ownerFacilities as $f) {
     <div class="modal-content">
       <span class="material-symbols-outlined modal-close" @click="showModal = false">close</span>
       <h3>新規施設を作成</h3>
-
-      <!-- <div class="tab-nav">
-        <div :class="['tab-item', { active: activeTab === 'url' }]" @click="activeTab = 'url'">スクショからAI作成</div>
-        <div :class="['tab-item', { active: activeTab === 'manual' }]" @click="activeTab = 'manual'">自由入力で作成</div>
-      </div> -->
-
-      <!-- <div v-if="activeTab === 'url'" class="tab-panel">
-        <form action="/core/create_from_images.php" method="POST" enctype="multipart/form-data">
-          <label for="images">スクリーンショット（最大10枚）</label>
-          <input type="file" name="images[]" id="images" accept="image/*,application/pdf" multiple required>
-
-          <label for="facility_type">施設タイプを選択：</label>
-          <select name="facility_type" id="facility_type" required>
-            <option value="民泊">民泊</option>
-            <option value="旅館">旅館</option>
-            <option value="ホテル">ホテル</option>
-            <option value="ビジネスホテル">ビジネスホテル</option>
-            <option value="キャンプ場">キャンプ場</option>
-            <option value="イベント">イベント</option>
-          </select>
-
-          <button type="submit">画像から施設を作成</button>
-        </form>
-      </div> -->
 
       <!-- ゼロから作成 -->
       <div class="tab-panel">

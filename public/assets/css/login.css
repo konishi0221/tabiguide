@@ -16,8 +16,8 @@
 
 body {
   font-family: 'Noto Sans JP', sans-serif;
-  min-height: 100vh;
-  background: #8B5CF6;
+  height: 100dvh;
+  background: whitesmoke;
   display: flex;
   align-items: center;
   justify-content: center;

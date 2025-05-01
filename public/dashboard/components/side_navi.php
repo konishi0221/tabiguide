@@ -18,6 +18,8 @@ $page_uid_safe = urlencode($page_uid);
     background: #fff;
     padding: 20px 0;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+    padding-bottom:40px;
   }
 
   #side_navi h3 {
@@ -45,18 +47,20 @@ $page_uid_safe = urlencode($page_uid);
     margin: 0;
     padding: 0;
   }
-
+  #side_navi  a {
+    display: block;
+  }
+  
   #side_navi li a {
     display: flex;
     align-items: center;
     padding: 8px 20px 8px 48px;
-    color: #444;
-    text-decoration: none;
+
     font-size: 13px;
     transition: background-color 0.2s;
   }
 
-  #side_navi li a:hover {
+  #side_navi  a:hover {
     background-color: #f5f5f5;
   }
 
@@ -73,6 +77,8 @@ $page_uid_safe = urlencode($page_uid);
       bottom: 0;
       transition: left 0.3s ease;
       z-index: 1000;
+      over-flow: scroll;
+      max-height: 100vh;
     }
 
     #side_navi.open {
@@ -93,7 +99,8 @@ $page_uid_safe = urlencode($page_uid);
 </style>
 
 <div id="side_navi">
-  <h3><span class="material-symbols-outlined side_icon">visibility</span><span class="h3_title">ゲストページ</span></h3>
+
+
 
   <?php
 $host = $_SERVER['HTTP_HOST'] ?? '';
@@ -107,14 +114,21 @@ $guest_base_url = $isLocal
 
 $guest_url = $guest_base_url . $page_uid_safe;
 ?>
-<ul>
-  <li>
-    <a href="<?= htmlspecialchars($guest_url, ENT_QUOTES) ?>" target="_blank">
-      ゲストページを確認
-      <span class="material-symbols-outlined open_in_new">open_in_new</span>
-    </a>
-  </li>
-</ul>
+
+<a href="/dashboard">
+  <h3>
+      <span class="material-symbols-outlined side_icon">dashboard</span>
+      <span class="h3_title">ダッシュボード</span>
+  </h3>
+</a>
+
+<a href="<?= htmlspecialchars($guest_url, ENT_QUOTES) ?>"  target="_blank">
+  <h3>
+      <span class="material-symbols-outlined side_icon">visibility</span>
+      <span class="h3_title">ゲストページ
+  </h3>
+</a>
+
 
 
   <h3><span class="material-symbols-outlined side_icon">smart_toy</span><span class="h3_title">AIチャット</span></h3>
@@ -133,7 +147,7 @@ $guest_url = $guest_base_url . $page_uid_safe;
 
   <h3><span class="material-symbols-outlined side_icon">palette</span><span class="h3_title">ユーザー画面</span></h3>
   <ul>
-    <li><a href="../design/index.php?page_uid=<?= $page_uid_safe ?>">ユーザー画面設定</a></li>
+    <li><a href="../design/chat.php?page_uid=<?= $page_uid_safe ?>">チャット設定</a></li>
     <li><a href="../design/design.php?page_uid=<?= $page_uid_safe ?>">デザイン設定</a></li>
   </ul>
 

@@ -1,4 +1,11 @@
 <?php
+// アップロード制限の設定
+ini_set('upload_max_filesize', '20M');
+ini_set('post_max_size', '20M');
+ini_set('memory_limit', '256M');
+ini_set('max_execution_time', '300');
+ini_set('max_input_time', '300');
+
 // エラー表示を有効化
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
@@ -75,7 +82,7 @@ if ($image['size'] > 5 * 1024 * 1024) {
 $base_dir = $_SERVER['DOCUMENT_ROOT'];
 $relative_dir = "/upload/" . $page_uid . "/images";
 $upload_dir = $base_dir . $relative_dir;
-$filename = $type . '.jpg';  // icon.jpg または background.jpg
+$filename = ($type === 'header_logo' || $type === 'icon') ? $type . '.png' : $type . '.jpg';  // ヘッダーロゴとアイコンはPNG、他はJPG
 $filepath = $upload_dir . '/' . $filename;
 
 error_log("Upload path details:");
@@ -142,26 +149,65 @@ try {
     $height = imagesy($source_image);
 
     // リサイズ後のサイズを計算
-    $max_size = ($type === 'icon') ? 200 : 1200;
-    if ($width > $max_size || $height > $max_size) {
-        if ($width > $height) {
-            $new_width = $max_size;
-            $new_height = floor($height * ($max_size / $width));
+    if ($type === 'icon') {
+        $dst_size = 200;              // 仕上がり 200px
+
+        // アイコン用キャンバス（透過 PNG）
+        $new_image = imagecreatetruecolor($dst_size, $dst_size);
+        imagealphablending($new_image, false);
+        imagesavealpha($new_image, true);
+        $transparent = imagecolorallocatealpha($new_image, 0, 0, 0, 127);
+        imagefilledrectangle($new_image, 0, 0, $dst_size, $dst_size, $transparent);
+    
+        // 元画像を 200px 正方形内にフィット（余白は透明）
+        $ratio = min($dst_size / $width, $dst_size / $height);
+        $new_width  = (int)($width  * $ratio);
+        $new_height = (int)($height * $ratio);
+        $dst_x = (int)(($dst_size - $new_width)  / 2);
+        $dst_y = (int)(($dst_size - $new_height) / 2);
+    
+        imagecopyresampled(
+            $new_image, $source_image,
+            $dst_x, $dst_y,            // キャンバス側の描画開始位置（中央寄せ）
+            0, 0,
+            $new_width, $new_height,   // リサイズ後
+            $width, $height            // 元サイズ
+        );
+    
+        imagepng($new_image, $filepath, 9);
         } else {
-            $new_height = $max_size;
-            $new_width = floor($width * ($max_size / $height));
+        // 他の画像は従来通り
+        $max_size = 1200;
+        if ($width > $max_size || $height > $max_size) {
+            if ($width > $height) {
+                $new_width = $max_size;
+                $new_height = floor($height * ($max_size / $width));
+            } else {
+                $new_height = $max_size;
+                $new_width = floor($width * ($max_size / $height));
+            }
+        } else {
+            $new_width = $width;
+            $new_height = $height;
         }
-    } else {
-        $new_width = $width;
-        $new_height = $height;
     }
 
     // 新しい画像を作成
     $new_image = imagecreatetruecolor($new_width, $new_height);
 
-    // 背景を白で塗りつぶす（透明部分の処理）
-    $white = imagecolorallocate($new_image, 255, 255, 255);
-    imagefill($new_image, 0, 0, $white);
+    // PNGの場合は透明度を保持
+    if ($type === 'header_logo' || $type === 'icon') {
+        // アルファチャンネルを有効化
+        imagealphablending($new_image, false);
+        imagesavealpha($new_image, true);
+        // 透明な背景を設定
+        $transparent = imagecolorallocatealpha($new_image, 0, 0, 0, 127);
+        imagefilledrectangle($new_image, 0, 0, $new_width, $new_height, $transparent);
+    } else {
+        // JPGの場合は白背景
+        $white = imagecolorallocate($new_image, 255, 255, 255);
+        imagefill($new_image, 0, 0, $white);
+    }
 
     // リサイズ
     imagecopyresampled(
@@ -171,8 +217,12 @@ try {
         $width, $height
     );
 
-    // JPGとして保存（高品質）
-    imagejpeg($new_image, $filepath, 95);
+    // 保存（ヘッダーロゴとアイコンはPNG、その他はJPG）
+    if ($type === 'header_logo' || $type === 'icon') {
+        imagepng($new_image, $filepath, 9); // 0-9の圧縮レベル、9が最高品質
+    } else {
+        imagejpeg($new_image, $filepath, 95);
+    }
 
     // リソースの解放
     imagedestroy($source_image);

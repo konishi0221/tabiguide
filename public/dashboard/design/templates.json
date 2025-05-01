@@ -15,8 +15,7 @@
     "input_background_color": "#333333",
     "send_button_color": "#4CAF50",
     "send_button_bg_color": "#2C2C2C",
-    "bg_filter_color": "#000000",
-    "bg_filter_opacity": 0.4,
+    "bg_filter_color": "rgba(0,0,0,0.4)",
     "bg_filter_blur": 8,
     "font_family": "Noto Sans JP"
   },
@@ -36,8 +35,7 @@
     "input_background_color": "#FFFFFF",
     "send_button_color": "#2196F3",
     "send_button_bg_color": "#FFFFFF",
-    "bg_filter_color": "#FFFFFF",
-    "bg_filter_opacity": 0.4,
+    "bg_filter_color": "rgba(255,255,255,0.4)",
     "bg_filter_blur": 8,
     "font_family": "Noto Sans JP"
   },
@@ -57,8 +55,7 @@
     "input_background_color": "#FFFFFF",
     "send_button_color": "#4CAF50",
     "send_button_bg_color": "#E8F5E9",
-    "bg_filter_color": "#000000",
-    "bg_filter_opacity": 0.2,
+    "bg_filter_color": "rgba(0,0,0,0.2)",
     "bg_filter_blur": 4,
     "font_family": "Noto Sans JP"
   },
@@ -78,8 +75,7 @@
     "input_background_color": "#FFFFFF",
     "send_button_color": "#2196F3",
     "send_button_bg_color": "#E3F2FD",
-    "bg_filter_color": "#000000",
-    "bg_filter_opacity": 0.2,
+    "bg_filter_color": "rgba(0,0,0,0.2)",
     "bg_filter_blur": 4,
     "font_family": "Noto Sans JP"
   },
@@ -99,8 +95,7 @@
     "input_background_color": "#FFFFFF",
     "send_button_color": "#FF4081",
     "send_button_bg_color": "#FCE4EC",
-    "bg_filter_color": "#000000",
-    "bg_filter_opacity": 0.2,
+    "bg_filter_color": "rgba(0,0,0,0.2)",
     "bg_filter_blur": 4,
     "font_family": "Noto Sans JP"
   },
@@ -120,8 +115,7 @@
     "input_background_color": "#FFFFFF",
     "send_button_color": "#78909C",
     "send_button_bg_color": "#ECEFF1",
-    "bg_filter_color": "#000000",
-    "bg_filter_opacity": 0.2,
+    "bg_filter_color": "rgba(0,0,0,0.2)",
     "bg_filter_blur": 4,
     "font_family": "Noto Sans JP"
   }

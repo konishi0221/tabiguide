@@ -57,12 +57,12 @@ $user_uid = $_SESSION['user']['uid'] ?? '';
   <div class="dashboard-container">
     <?php include(dirname(__DIR__) . '/components/side_navi.php'); ?>
     
-    <div class="container">
+    <div id="app" class="container">
       <main>
-        <div class="chat-settings">
+
           <h1>チャット設定</h1>
           
-          <section id="chat_setting" class="setting-section" data-uid="<?= htmlspecialchars($page_uid) ?>">
+          <section id="chat_setting" class="" data-uid="<?= htmlspecialchars($page_uid) ?>">
             <form method="post" action="chat_save.php">
               <div class="form-group">
                 <input type="hidden" name="page_uid" value="<?= htmlspecialchars($page_uid) ?>">
@@ -94,20 +94,16 @@ $user_uid = $_SESSION['user']['uid'] ?? '';
                 </select>
 
                 <label for="first">最初のメッセージ</label>
+
+                
                 <input id="first" type="text" name="first_message"
                       v-model="firstMessage"
                       maxlength="120">
-
-                <div class="preview">
-                  <h3>プレビュー</h3>
-                  <div class="message">{{ firstMessage }}</div>
-                </div>
-
+                      <br>
                 <button type="submit" class="btn-primary">保存</button>
               </div>
             </form>
           </section>
-        </div>
       </main>
     </div>
   </div>
@@ -118,8 +114,8 @@ $user_uid = $_SESSION['user']['uid'] ?? '';
   createApp({
     data() {
       return {
-        type: '',
-        firstMessage: '',
+        type: 'ふつうの丁寧',
+        firstMessage: 'こんにちは。ご不明点がございましたら、どうぞお気軽にお尋ねくださいませ。',
         greetings: {
           'ふつうの丁寧語': 'こんにちは。ご不明点がございましたら、どうぞお気軽にお尋ねくださいませ。',
           'フレンドリー＆丁寧': 'こんにちは！気になることがあれば何でも聞いてくださいね。すぐにお手伝いします♪',

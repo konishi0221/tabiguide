@@ -23,7 +23,8 @@ gcloud run deploy tabiguide-service \
 
 
   docker run --rm   --env-file ./.env.docker   -v "$(pwd)":/workspace   -p 8080:8080   tabiguide:local
-  
+  docker run --rm   --env-file .env.docker   -v "$PWD":/workspace   -p 8080:8080  tabiguide:local
+
 
 
 

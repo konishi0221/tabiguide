@@ -28,8 +28,7 @@ $design = [
     'user_text_color' => '#333333',
     'message_text_color' => '#333333',
     'input_background_color' => '#FFFFFF',
-    'bg_filter_color' => '#000000',
-    'bg_filter_opacity' => 0.2,
+    'bg_filter_color' => 'rgba(0,0,0,0.2)',
     'bg_filter_blur' => 4,
     'font_family' => 'Noto Sans JP',
     'page_uid' => $page_uid,
@@ -62,6 +61,32 @@ if ($result && $result['design_json']) {
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link rel="stylesheet" href="design.css">
     <style>
+    .chat-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .header-logo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+    }
+
+    .header-logo img {
+        max-height: 40px;
+        max-width: 100%;
+        object-fit: contain;
+    }
+
+    .chat-header h1 {
+        margin: 0;
+        font-size: 1.2rem;
+        font-weight: 500;
+    }
     </style>
 </head>
 <body>
@@ -106,9 +131,19 @@ if ($result && $result['design_json']) {
                       ></div>
                       <!-- ヘッダー -->
                       <div class="chat-header" :style="{ backgroundColor: design.primary_color }">
-                        <div v-if="preview.header_logo_url || design.header_logo_url" class="header-logo">
-                          <img :src="preview.header_logo_url || `/upload/${design.page_uid}/images/header_logo.jpg`" alt="施設ロゴ">
-                        </div>
+                        <template v-if="preview.header_logo_url">
+                          <div class="header-logo">
+                            <img :src="preview.header_logo_url" alt="施設ロゴ" style="max-height: 40px; max-width: 100%; object-fit: contain;">
+                          </div>
+                        </template>
+                        <template v-else-if="design.header_logo_url">
+                          <div class="header-logo">
+                            <img :src="`/upload/${design.page_uid}/images/header_logo.png?${Date.now()}`" 
+                                 alt="施設ロゴ" 
+                                 style="max-height: 40px; max-width: 100%; object-fit: contain;"
+                                 @error="handleImageError">
+                          </div>
+                        </template>
                         <h1 v-else :style="{ color: design.header_text_color }">海辺の家</h1>
                       </div>
 
@@ -119,7 +154,7 @@ if ($result && $result['design_json']) {
                               backgroundImage: preview.icon_url 
                                 ? `url('${preview.icon_url}')` 
                                 : design.icon_url 
-                                  ? `url('/upload/${design.page_uid}/images/icon.jpg')`
+                                  ? `url('/upload/${design.page_uid}/images/icon.png')`
                                   : 'none',
                               backgroundColor: '#FFFFFF',
                               backgroundSize: 'cover',
@@ -266,7 +301,7 @@ if ($result && $result['design_json']) {
                   <div class="image-upload-area" 
                        :class="{ 'has-image': preview.icon_url || design.icon_url }"
                        @click="triggerFileInput('icon')"
-                       :style="{ backgroundImage: preview.icon_url ? `url('${preview.icon_url}')` : design.icon_url ? `url('/upload/${design.page_uid}/images/icon.jpg')` : 'none' }">
+                       :style="{ backgroundImage: preview.icon_url ? `url('${preview.icon_url}')` : design.icon_url ? `url('/upload/${design.page_uid}/images/icon.png')` : 'none' }">
                     <input type="file" 
                            ref="iconInput" 
                            accept="image/*"
@@ -289,7 +324,7 @@ if ($result && $result['design_json']) {
                   <div class="image-upload-area"
                        :class="{ 'has-image': preview.background_url || design.background_url }"
                        @click="triggerFileInput('background')"
-                       :style="{ backgroundImage: preview.background_url ? `url('${preview.background_url}')` : design.background_url ? `url('/upload/${design.page_uid}/images/background.jpg')` : 'none' }">
+                       :style="{ backgroundImage: preview.background_url ? `url('${preview.background_url}')` : design.background_url ? `url('/upload/${design.page_uid}/images/background.png')` : 'none' }">
                     <input type="file" 
                            ref="backgroundInput" 
                            accept="image/*"
@@ -312,7 +347,7 @@ if ($result && $result['design_json']) {
                   <div class="image-upload-area"
                        :class="{ 'has-image': preview.header_logo_url || design.header_logo_url }"
                        @click="triggerFileInput('header_logo')"
-                       :style="{ backgroundImage: preview.header_logo_url ? `url('${preview.header_logo_url}')` : design.header_logo_url ? `url('/upload/${design.page_uid}/images/header_logo.jpg')` : 'none' }">
+                       :style="{ backgroundImage: preview.header_logo_url ? `url('${preview.header_logo_url}')` : design.header_logo_url ? `url('/upload/${design.page_uid}/images/header_logo.png')` : 'none' }">
                     <input type="file" 
                            ref="header_logoInput" 
                            accept="image/*"
@@ -378,7 +413,8 @@ if ($result && $result['design_json']) {
                 design: <?php echo json_encode($design); ?>,
                 preview: {
                     icon_url: null,
-                    background_url: null
+                    background_url: null,
+                    header_logo_url: null
                 },
                 templates: null,
                 availableFonts: [
@@ -408,15 +444,17 @@ if ($result && $result['design_json']) {
                     return;
                 }
 
-                // ファイルサイズチェック（5MB以下）
-                if (file.size > 5 * 1024 * 1024) {
-                    alert('ファイルサイズは5MB以下にしてください');
+                // ファイルサイズチェック（20MB以下）
+                const maxSize = 20 * 1024 * 1024; // 20MB
+                if (file.size > maxSize) {
+                    alert(`ファイルサイズは20MB以下にしてください（現在のサイズ: ${Math.round(file.size / 1024 / 1024)}MB）`);
                     return;
                 }
 
                 // 画像タイプチェック
-                if (!file.type.startsWith('image/')) {
-                    alert('画像ファイルを選択してください');
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('アップロードできる画像形式は JPG, PNG, GIF のみです');
                     return;
                 }
 
@@ -431,29 +469,16 @@ if ($result && $result['design_json']) {
                     formData.append('type', type);
                     formData.append('page_uid', this.design.page_uid);
 
-                    console.log('Uploading file:', {
-                        name: file.name,
-                        type: file.type,
-                        size: file.size,
-                        formType: type,
-                        pageUid: this.design.page_uid
-                    });
-
                     const response = await axios.post('/api/design/upload-image.php', formData, {
                         headers: {
                             'Content-Type': 'multipart/form-data'
-                        },
-                        onUploadProgress: (progressEvent) => {
-                            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-                            console.log('Upload progress:', percentCompleted + '%');
                         }
                     });
                     
-                    console.log('Upload response:', response.data);
-                    
                     if (response.data.success) {
+                        // 画像のアップロードが成功したら、design.header_logo_urlをtrueに設定
                         this.design[`${type}_url`] = true;
-                        console.log(`${type} 画像のアップロードに成功:`, response.data.url);
+                        console.log(`${type} 画像のアップロードに成功`);
                     } else {
                         throw new Error(response.data.message || 'アップロードに失敗しました');
                     }
@@ -468,8 +493,13 @@ if ($result && $result['design_json']) {
             },
             async saveDesign() {
                 try {
+                    // 保存前にbg_filter_colorをrgba形式に変換
+                    const designData = { ...this.design };
+                    designData.bg_filter_color = this.hexToRgba(this.design.bg_filter_color, this.design.bg_filter_opacity);
+                    delete designData.bg_filter_opacity;  // opacityは不要になるので削除
+
                     const response = await axios.post('/api/design/save_design.php', {
-                        design: this.design
+                        design: designData
                     });
                     
                     if (response.data.success) {
@@ -498,10 +528,11 @@ if ($result && $result['design_json']) {
                 }
             },
             applyTemplate(template) {
-                // URLとフィルター設定を保持
+                // URLとフォント設定を保持
                 const currentUrls = {
                     icon_url: this.design.icon_url,
-                    background_url: this.design.background_url
+                    background_url: this.design.background_url,
+                    header_logo_url: this.design.header_logo_url
                 };
                 const currentFont = this.design.font_family;
 
@@ -511,6 +542,7 @@ if ($result && $result['design_json']) {
                 // 保持していた設定を戻す
                 this.design.icon_url = currentUrls.icon_url;
                 this.design.background_url = currentUrls.background_url;
+                this.design.header_logo_url = currentUrls.header_logo_url;
                 this.design.font_family = currentFont;
             },
             isCurrentTemplate(template) {
@@ -527,7 +559,7 @@ if ($result && $result['design_json']) {
                     if (response.data.success) {
                         // プレビューと設定をクリア
                         this.preview[`${type}_url`] = null;
-                        this.design[`${type}_url`] = false;
+                        this.design[`${type}_url`] = null;  // nullに設定
                         if (this.preview[`${type}_url`]) {
                             URL.revokeObjectURL(this.preview[`${type}_url`]);
                         }
@@ -540,6 +572,25 @@ if ($result && $result['design_json']) {
                     alert(`画像の削除に失敗しました: ${error.response?.data?.message || error.message}`);
                 }
             },
+            handleImageError(event) {
+                console.error('画像読み込みエラー:', event);
+            },
+            // rgbaの文字列から値を抽出するメソッド
+            parseRgba(rgba) {
+                const matches = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)/);
+                if (matches) {
+                    const [_, r, g, b, a] = matches;
+                    const hex = '#' + [r, g, b].map(x => {
+                        const hex = parseInt(x).toString(16);
+                        return hex.length === 1 ? '0' + hex : hex;
+                    }).join('');
+                    return {
+                        color: hex,
+                        opacity: parseFloat(a)
+                    };
+                }
+                return null;
+            }
         },
         watch: {
             'preview.background_url': function(newVal) {
@@ -557,6 +608,23 @@ if ($result && $result['design_json']) {
         },
         mounted() {
             this.loadTemplates();
+            // 初期値のrgbaをパースしてbg_filter_colorとbg_filter_opacityを設定
+            const rgbaValues = this.parseRgba(this.design.bg_filter_color);
+            if (rgbaValues) {
+                this.design.bg_filter_color = rgbaValues.color;
+                this.design.bg_filter_opacity = rgbaValues.opacity;
+            }
+
+            // ヘッダーロゴの存在確認
+            const headerLogoImg = new Image();
+            headerLogoImg.onload = () => {
+                this.design.header_logo_url = true;
+            };
+            headerLogoImg.onerror = () => {
+                this.design.header_logo_url = false;
+            };
+            headerLogoImg.src = `/upload/${this.design.page_uid}/images/header_logo.png?${Date.now()}`;
+
             console.log('初期状態:', {
                 preview: this.preview,
                 design: this.design
