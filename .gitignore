@@ -6,6 +6,8 @@ vendor/
 .env
 core/.env
 *.env
+*.env.docker
+*.env.clear
 
 # IDE/editor folders
 .vscode/

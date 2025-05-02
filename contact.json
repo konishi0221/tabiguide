@@ -1,0 +1,14 @@
+{
+  "phone_number": "+818050279206",
+  "email": "konishi0221@gmail.com",
+  "postal_address": {
+    "region_code": "JP",
+    "postal_code": "153-0051",
+    "administrative_area": "Tokyo",
+    "locality": "Meguro-ku",
+    "address_lines": ["2-30-4 Kamimeguro"],
+    "recipients": ["Yuki Konishi"],
+    "organization": ""
+  },
+  "contact_privacy": "PUBLIC_CONTACT_DATA"
+}
