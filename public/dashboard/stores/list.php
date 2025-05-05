@@ -44,8 +44,6 @@ foreach ($stores as &$store) {
 }
 unset($store); // foreach参照を解放
 
-
-
 ?>
 
 <!DOCTYPE html>
@@ -58,6 +56,8 @@ unset($store); // foreach参照を解放
     <link rel="stylesheet" href="/assets/css/admin_layout.css">
     <link rel="stylesheet" href="/assets/css/admin_design.css">
     <meta name="robots" content="noindex, nofollow">
+
+
 
     <style>
     .card-grid {

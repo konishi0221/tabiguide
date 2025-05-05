@@ -69,7 +69,7 @@ a {
 /* ❸ :hover / :focus で何かしら付けたい場合は追記 */
 a:hover,
 a:focus-visible {
-  text-decoration: underline;
+  /* text-decoration: underline; */
 }
 
 /* ==========================================

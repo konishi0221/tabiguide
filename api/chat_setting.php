@@ -1,6 +1,5 @@
 <?php
-require_once __DIR__ . '/cros.php';    // ← 先頭に / を付ける
-
+require_once __DIR__ . '/cros.php';
 require_once dirname(__DIR__) . '/public/core/config.php';
 require_once dirname(__DIR__) . '/public/core/db.php';
 
@@ -8,7 +7,7 @@ header('Content-Type: application/json; charset=utf-8');
 
 // ── 入力取得 ────────────────────────────────
 $pageUid = $_GET['page_uid'] ?? '';
-$target  = $_GET['lang']     ?? 'ja';     // 例: en, ko, zh‑CN
+$target  = $_GET['lang']     ?? 'ja';     // 例: en, ko, zh-CN
 
 if ($pageUid === '') {
   http_response_code(400);
@@ -18,21 +17,25 @@ if ($pageUid === '') {
 
 // ── DB 取得 ──────────────────────────────────
 $stmt = $pdo->prepare(
-  'SELECT chat_charactor, chat_first_message
-     FROM design
-    WHERE page_uid = ?
-    LIMIT 1'
+  'SELECT
+     chat_charactor,
+     chat_first_message,
+     voice_first_message
+   FROM design
+   WHERE page_uid = ?
+   LIMIT 1'
 );
 $stmt->execute([$pageUid]);
 $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [
-  'chat_charactor'     => 'ふつうの丁寧語',
-  'chat_first_message' => 'こんにちは！ご質問があればどうぞ！'
+  'chat_charactor'        => 'ふつうの丁寧語',
+  'chat_first_message'    => 'こんにちは！ご質問があればどうぞ！',
+  'voice_first_message'   => 'お電話ありがとうございます。ご不明点がございましたらお知らせくださいませ。'
 ];
 
 // ── 翻訳ユーティリティ ──────────────────────
 function gTranslate(string $text, string $target, string $apiKey): string
 {
-  if ($target === 'ja') return $text; // 日本語→日本語はスキップ
+  if ($target === 'ja') return $text;
 
   $url = 'https://translation.googleapis.com/language/translate/v2';
   $params = http_build_query([
@@ -50,15 +53,16 @@ function gTranslate(string $text, string $target, string $apiKey): string
   $res = curl_exec($ch);
   curl_close($ch);
 
-  if (!$res) return $text;                // タイムアウト時は原文
+  if (!$res) return $text;
   $json = json_decode($res, true);
   return $json['data']['translations'][0]['translatedText'] ?? $text;
 }
 
 // ── 翻訳実行 ────────────────────────────────
-$apiKey = $GOOGLE_MAPS_API_KEY;           // config.php 内で定義済み
-$row['chat_charactor']     = gTranslate($row['chat_charactor'],     $target, $apiKey);
-$row['chat_first_message'] = gTranslate($row['chat_first_message'], $target, $apiKey);
+$apiKey = $GOOGLE_MAPS_API_KEY;  // config.php 内で定義済み
+$row['chat_charactor']       = gTranslate($row['chat_charactor'],     $target, $apiKey);
+$row['chat_first_message']   = gTranslate($row['chat_first_message'], $target, $apiKey);
+$row['voice_first_message']  = gTranslate($row['voice_first_message'],$target, $apiKey);
 
 // ── 出力 ─────────────────────────────────────
 echo json_encode($row, JSON_UNESCAPED_UNICODE);

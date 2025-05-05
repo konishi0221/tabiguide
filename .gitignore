@@ -6,8 +6,9 @@ vendor/
 .env
 core/.env
 *.env
+*.env*
 *.env.docker
-*.env.clear
+*.env.clean
 
 # IDE/editor folders
 .vscode/
@@ -26,3 +27,4 @@ public/node_modules/
 
 # OS generated files
 Thumbs.db
+.env.clean
