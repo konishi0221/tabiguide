@@ -27,4 +27,5 @@ public/node_modules/
 
 # OS generated files
 Thumbs.db
-.env.clean
+
+**/gcs-key.json
