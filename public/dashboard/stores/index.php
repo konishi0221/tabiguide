@@ -66,6 +66,7 @@ if (!empty($_GET['id'])) {
     <link rel="stylesheet" href="/assets/css/admin_layout.css">
     <link rel="stylesheet" href="/assets/css/admin_design.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
 </head>
 <body>
   <?php include(dirname(__DIR__) . '/components/dashboard_header.php'); ?>
@@ -78,18 +79,14 @@ if (!empty($_GET['id'])) {
 
         <div id="map" style="height: 500px;"></div>
 
-        <form action="complete.php" method="POST" enctype="multipart/form-data">
+        <form action="complete.php?page_uid=<?= $page_uid ?>" method="POST" enctype="multipart/form-data">
             <input type="hidden" name="id" value="<?php echo !empty($store['id']) ? $store['id'] : ''; ?>">
             <input type="hidden" name="uid" v-model="uid">
             <input type="hidden" name="mode" value="<?php echo empty($store['id']) ? 'insert' : 'update'; ?>">
             <input type="hidden" name="facility_uid" v-model="facility_uid" >
 
-            <p><label>店舗名: </label><input type="text" name="name" v-model="name"> <span @click="translate('name')" >翻訳</span></p>
-            <!-- <p>
-              <label>店舗名(英語): </label>
-              <input type="text" v-model="en_name" @input="encodeForPost(en_name, 'en_name_encoded')">
-              <input type="hidden" name="en_name" :value="en_name_encoded">
-            </p> -->
+            <p><label>店舗名: </label><input type="text" name="name" v-model="name"></p>
+
             <p><label>カテゴリ:</label>
                 <select name="category" v-model="category">
                     <?php foreach ($category_list as $category) { ?>
@@ -106,12 +103,7 @@ if (!empty($_GET['id'])) {
             </p>
 
 
-            <p><label>説明: </label><textarea name="description" v-model="description"></textarea>  <span @click="translate('description')" >翻訳</span></p>
-            <!-- <p>
-              <label>説明(英語): </label>
-              <textarea v-model="en_description" @input="encodeForPost(en_description, 'en_description_encoded')"></textarea>
-              <input type="hidden" name="en_description" :value="en_description_encoded">
-            </p> -->
+            <p><label>説明: </label><textarea name="description" v-model="description" style="min-height:200px" ></textarea></p>
 
             <p><label>緯度: </label>{{ lat }} <input type="hidden" name="lat" v-model="lat"></p>
             <p><label>経度: </label>{{ lng }} <input type="hidden" name="lng" v-model="lng"></p>
@@ -129,27 +121,24 @@ if (!empty($_GET['id'])) {
             <button type="submit">{{ id ? '更新' : '追加' }}</button>
         </form>
 
-        <?php
-        $imagePath = "../../assets/uploads/" . ($store['uid'] ?? '') . ".jpg";
-        ?>
           <br>
           <br>
           <br>
           <br>
           <div id="image-preview" v-if="uid">
-            <img :src="src"
-                 alt="店舗画像"
-                 onerror="this.onerror=null;this.src='/assets/images/no_image.png';">
-            <br><br>
+          <img
+            :src=" 'https://storage.googleapis.com/' + GCS_BUCKET + '/stores/' + facility_uid + '/'  +  uid +'.png?i=' + Math.random() "
+            alt="店舗画像"
+        >
+        <!-- onerror="this.onerror=null;this.src='/assets/images/no_image.png';" -->
 
             <form action="delete_store.php" method="POST">
                 <input type="hidden" name="mode" value="delete_image">
                 <input type="hidden" name="uid" value="<?= htmlspecialchars($store['uid']) ?>">
                 <input type="hidden" name="id" value="<?= $store['id'] ?>">
-                <input type="hidden" name="facility_uid" value="<?= $store['facility_uid'] ?? $_GET['page_uid'] ?>">
+                <input type="hidden" name="facility_uid" value="<?= $store['facility_uid'] ?? $_GET['uid'] ?>">
                 <button type="submit" onclick="return confirm('画像を削除しますか？');">画像を削除</button>
             </form>
-
           </div>
       </main>
     </div>
@@ -179,12 +168,12 @@ if (!empty($_GET['id'])) {
             uid: <?php echo json_encode($store['uid'] ?? ''); ?>,
             url: <?php echo json_encode($store['url'] ?? ''); ?>,
             facility_uid: <?php echo json_encode($store['facility_uid'] ?? $page_uid); ?>,
-            src: "/upload/" + <?php echo json_encode($store['facility_uid'] ?? $page_uid); ?> + "/stores/" + <?php echo json_encode($store['uid'] ?? ''); ?> + ".jpg",
             map: null,
             marker: null,
             en_description_encoded: '',
             en_name_encoded: '',
             url_encoded: '',
+            GCS_BUCKET: "<?php echo getenv('GCS_BUCKET'); ?>"
           };
         },
         mounted() {

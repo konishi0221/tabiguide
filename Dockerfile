@@ -1,7 +1,7 @@
 FROM php:8.2-cli-alpine
 
 # ランタイム用ライブラリ
-RUN apk add --no-cache libpng libjpeg-turbo freetype
+RUN apk add --no-cache libpng libjpeg-turbo freetype ffmpeg
 
 # ── GD をビルド ──
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
@@ -11,11 +11,12 @@ RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
   && apk del .build-deps   # ビルド専用パッケージ削除
 
 WORKDIR /workspace
-COPY . .
+COPY . .  
 
-# ← この行だけ必ず置き換え！
+ENV GOOGLE_AUTH_DISABLE_CREDENTIALS_FILE_SEARCH=true
+ENV GOOGLE_AUTH_SUPPRESS_CREDENTIALS_WARNINGS=true
+
 CMD exec php \
-    -d open_basedir=/workspace:/srv:/tmp \
     -d max_execution_time=0 \
     -S 0.0.0.0:8080 \
     -t /workspace/public /workspace/router.php

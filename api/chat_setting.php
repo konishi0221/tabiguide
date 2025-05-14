@@ -33,8 +33,11 @@ $row = $stmt->fetch(PDO::FETCH_ASSOC) ?: [
 ];
 
 // ── 翻訳ユーティリティ ──────────────────────
-function gTranslate(string $text, string $target, string $apiKey): string
+function gTranslate(?string $text, string $target, string $apiKey): string
 {
+  if ($text === null || $text === '') {
+    return '';
+  }
   if ($target === 'ja') return $text;
 
   $url = 'https://translation.googleapis.com/language/translate/v2';

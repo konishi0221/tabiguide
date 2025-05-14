@@ -13,6 +13,7 @@ require_once dirname(__DIR__).'/chat/CtxStore.php';
 require_once dirname(__DIR__).'/chat/save.php';
 require_once dirname(__DIR__).'/chat/ToolDefinitions.php';
 require_once dirname(__DIR__).'/chat/FaqSearcher.php';
+require_once dirname(__DIR__,2).'/public/core/token_usage.php';
 
 
 
@@ -65,8 +66,10 @@ class ChatService
     
             /* 1) 履歴に user を追加して保存 */
             $hist      = $this->store->load();
+            // error_log('[History before ask] ' . json_encode($hist, JSON_UNESCAPED_UNICODE));
             $hist[]    = ['role' => 'user', 'content' => $userMessage];
             $this->store->save($hist);
+            // error_log('[History after user ask] ' . json_encode($hist, JSON_UNESCAPED_UNICODE));
     
             /* 2) system prompt */
             $system    = $this->prompt->build($this->ctxStore->load(), $this->mode);
@@ -76,14 +79,14 @@ class ChatService
             foreach (array_slice($hist, -20) as $m) $messages[] = $m;
     
             /* 4) 初回チャット */
-            $resp = $this->ai->chat($messages, ToolDefinitions::TOOLS);
+            $resp = $this->ai->chat($messages, ToolDefinitions::TOOLS, ['uid' => $this->pageUid]);
     
             /* ChatService ask() : 初回返答受信後すぐ */
 
 
             /* 5) function-calling ループ */
             $botText = '';
-            for ($loop = 0; $loop < 5; $loop++) {
+            for ($loop = 0; $loop < 3; $loop++) {
                 $msg = $resp['choices'][0]['message'] ?? [];
 
                 if (isset($msg['tool_calls'][0]['function'])) {
@@ -97,9 +100,9 @@ class ChatService
                 }
                 if ($this->handleCall($hist, $msg) === null) break;
                 $messages[] = end($hist);                      // 直前 function
-                $resp       = $this->ai->chat($messages, ToolDefinitions::TOOLS);
+                $resp       = $this->ai->chat($messages, ToolDefinitions::TOOLS, ['uid' => $this->pageUid]);
             }
-    
+            
             /* 6) 最終応答保存 */
             if ($botText === '') $botText = '確認しますのでお待ちください。';
             $hist[] = ['role' => 'assistant', 'content' => $botText];
@@ -170,13 +173,11 @@ class ChatService
         return $this->store->load();
     }
 
-
     private function handleCall(array &$hist, array $msg): ?string
     {
         $name = $msg['function_call']['name'] ?? '';
         $args = json_decode($msg['function_call']['arguments'] ?? '{}', true);
-        error_log('[tool] '.$name.' '.json_encode($args, JSON_UNESCAPED_UNICODE));
-
+    
         return match ($name) {
             'updateCtx'   => $this->handleUpdateCtx($hist, $args),
             'getInfo'     => $this->handleGetInfo($hist, $args),

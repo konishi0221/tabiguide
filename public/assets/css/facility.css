@@ -1,0 +1,134 @@
+/* ---------- Facility Dashboard styles ---------- */
+
+.grid{
+  display:grid;
+  gap:1.5rem;
+  margin-top:2rem;
+}
+@media(min-width:900px){
+  .grid{grid-template-columns:1fr 1fr;}
+}
+
+.card{
+  background:#fff;
+  border:1px solid #ddd;
+  border-radius:12px;
+  padding:1.5rem;
+  box-shadow:0 2px 6px rgba(0,0,0,.05);
+}
+.card h2{font-size:1.1rem;margin:0 0 .5rem}
+.kpi{font-size:1.2rem;font-weight:bold}
+
+.link-btn{
+  display:inline-block;
+  margin-top:.7rem;
+  padding:6px 12px;
+  border-radius:6px;
+  background:#1976d2;
+  color:#fff;
+  font-size:.85rem;
+  text-decoration:none;
+}
+
+.progress{
+  height:8px;
+  background:#eee;
+  border-radius:4px;
+  overflow:hidden;
+  margin:.3rem 0 .8rem;
+}
+.progress>div{
+  height:100%;
+  background:#1976d2;
+}
+.bar{margin-bottom:.6rem;font-size:.9rem}
+
+/* ---------- Room list (legacy) ---------- */
+.room-list-container{margin-top:2rem}
+.room-card{
+  position:relative;
+  border:1px solid #ddd;
+  border-radius:12px;
+  padding:1.5rem;
+  margin-bottom:1.5rem;
+  background:#fff;
+  box-shadow:0 2px 6px rgba(0,0,0,.05);
+}
+.room-card:hover{box-shadow:0 4px 10px rgba(0,0,0,.08);}
+.room-title{font-size:1.1rem;font-weight:bold;margin-bottom:.5rem;color:#333}
+.room-info{font-size:.95rem;color:#666;margin-bottom:.5rem}
+.room-actions{margin-top:.5rem}
+.room-actions form{display:inline-block;margin-right:.5rem}
+.room-actions button{
+  padding:6px 12px;border:none;border-radius:6px;cursor:pointer;font-size:.85rem
+}
+.room-actions .edit-button{background:#1976d2;color:#fff}
+.room-delete-icon{
+  background:#fff;position:absolute;bottom:12px;right:12px;
+  color:#e53935;font-size:20px;cursor:pointer;transition:color .2s ease
+}
+.room-delete-icon:hover{color:#b71c1c;background:rgba(0,0,0,.2)}
+
+/* ---------- Milestone progress ---------- */
+.steps{
+  display:flex;
+  align-items:center;
+  margin-top:.8rem;
+  padding:0;
+  list-style:none;
+  counter-reset:step;
+  width:100%;
+}
+.steps li{
+  position:relative;
+  flex:1 1 0;
+  text-align:center;
+  font-size:.8rem;
+  color:#666;
+}
+.steps li .dot{
+  display:inline-block;
+  width:22px;
+  height:22px;
+  line-height:22px;
+  border-radius:50%;
+  background:#cfd8dc;          /* todo (grey) */
+  color:#fff;
+  font-weight:bold;
+}
+.steps li.done .dot{
+  background:#2e7d32;          /* done (deep green) */
+}
+.steps li.active .dot{
+  background:#ffb300;          /* current (amber) */
+  color:#fff;
+}
+.steps li::after{              /* connector line */
+  content:'';
+  position:absolute;
+  top:13px;                    /* vertically centered on dot */
+  left:calc(50% + 11px);       /* dot radius (22px) / 2 */
+  width:calc(100% - 22px);     /* subtract both dot radii to avoid overlap */
+  height:1px;
+  background:#cfd8dc;
+  z-index:-1;
+}
+.steps li:first-child::after{display:none;}
+.steps li:last-child::after{display:none;}
+.steps li.done::after{background:#2e7d32;}
+.label{display:block;margin-top:4px}
+
+/* ---------- Setup‑progress layout tweaks ---------- */
+@media (min-width:900px){
+  #overview{
+    grid-column:1 / -1;           /* full-width card */
+  }
+}
+/* ---- partial state for "近隣のお店登録" ---- */
+.steps li.partial .dot{
+  background:#ffb300;    /* amber for in‑progress */
+  color:#fff;
+}
+.steps li.partial::after{
+  background:#ffb300;
+}

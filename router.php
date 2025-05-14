@@ -1,5 +1,25 @@
 <?php
-$uri     = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+declare(strict_types=1);
+/* buffer output to avoid "headers already sent" (e.g., BOM issues) */
+ob_start();
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+/* ---------- canonical redirect ---------- */
+$canonicalHost = 'tabiguide.net';
+$host          = $_SERVER['HTTP_HOST'] ?? '';
+
+$shouldRedirect =                       // redirect sources
+    ($host === 'app.tabiguide.net' ||    // → SPA ドメイン
+     str_ends_with($host, '.run.app'))   // → Cloud Run デフォルト
+    && !str_starts_with($uri, '/api/')   // API はそのまま
+    && $host !== 'localhost'
+    && $host !== '127.0.0.1';
+
+if ($shouldRedirect) {
+    $target = 'https://' . $canonicalHost . ($_SERVER['REQUEST_URI'] ?? '/');
+    header('Location: ' . $target, true, 308);       // preserve method & body
+    exit;
+}
+/* ---------- end canonical redirect ---------- */
 $public  = __DIR__ . '/public';             // doc-root (= -t public)
 set_include_path(__DIR__.'/public/core'.PATH_SEPARATOR.get_include_path());
 

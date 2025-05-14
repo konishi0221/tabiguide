@@ -1,8 +1,17 @@
 {
   "name": "tabiguide/app",
-  "require": {},
+  "require": {
+    "google/cloud-storage": "^1.48",
+    "stripe/stripe-php": "^17.2",
+    "openai-php/client": "^0.6"
+  },
   "scripts": {
     "start": "php -S 0.0.0.0:$PORT -t public",
     "dev": "php -d max_execution_time=0 -S localhost:8080 -t public router.php"
+  },
+  "config": {
+    "allow-plugins": {
+      "php-http/discovery": true
+    }
   }
 }

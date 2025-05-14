@@ -16,7 +16,7 @@ $faqList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>FAQ 管理</title>
+<title>ゲストからの質問・学習情報</title>
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <link rel="stylesheet" href="/assets/css/admin_layout.css">
 <link rel="stylesheet" href="/assets/css/admin_design.css">
@@ -32,7 +32,7 @@ $faqList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <?php include dirname(__DIR__) . '/components/side_navi.php'; ?>
 <div id="app" class="container">
 <main>
-<h1>よくある質問</h1>
+<h1>ゲストからの質問・学習情報</h1>
 
 <div class="tab-nav">
   <button v-for="t in tabs" :key="t.key"
@@ -40,12 +40,12 @@ $faqList = $stmt->fetchAll(PDO::FETCH_ASSOC);
           :class="{active:active===t.key}">{{t.label}}</button>
 </div>
 
-<button @click="openNew()" type="button">＋新規 FAQ</button>
+<button @click="openNew()" type="button">＋新しい学習情報を追加</button>
 
 <!-- 新規 FAQ モーダル -->
 <div v-if="newForm.open" class="modal-mask" @click.self="closeNew">
   <div class="modal-body">
-    <h3>新規 FAQ</h3>
+    <h3>新しい学習情報を追加</h3>
     <textarea rows="4" v-model="newForm.question" placeholder="質問を入力..."></textarea>
     <textarea rows="4" v-model="newForm.answer"   placeholder="回答（空でも可）"></textarea>
     <input    type="text"       v-model="newForm.tags"     placeholder="タグをカンマ区切り">
@@ -59,10 +59,9 @@ $faqList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <br>
 
 
-<div v-for="f in filtered" :key="f.id" class="faq-item-wrap" :class="{ edit: f.editing} "
-     @click="!f.editing && startEdit(f)">
+<div v-for="f in filtered" :key="f.id" class="faq-item-wrap" :class="{ edit: f.editing} ">
 
-  <div class="faq-item" >
+  <div class="faq-item"  @click.self="!f.editing && startEdit(f)" >
 
     <!-- pin -->
     <button class="icon-btn icon-star" :class="{pinned:f.pinned==1}"
@@ -86,20 +85,20 @@ $faqList = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </button>
 
     <!-- question -->
-    <div v-if="f.editing" class="editing_text">質問を編集中</div>
+    <div v-if="f.editing" class="editing_text" @click.self=" f.editing = false ">質問を編集中</div>
 
-    <div v-if="!f.editing" class="q">Q: {{f.question}}</div>
+    <div v-if="!f.editing" @click.self="!f.editing && startEdit(f)" class="q">Q: {{f.question}}</div>
     <textarea v-else rows="2" class="question-box"
-              v-model="f.editQuestion" placeholder="質問を入力..."></textarea>
+              v-model="f.editQuestion" placeholder="シャンプーのストックはどこ？"></textarea>
 
     <!-- answer -->
-    <div v-if="!f.editing" v-html=" f.answer ? 'A: ' + f.answer : '<em>未回答</em>'"></div>
+    <div v-if="!f.editing" @click.self="!f.editing && startEdit(f)" v-html=" f.answer ? 'A: ' + f.answer : '<em>未回答</em>'"></div>
     <textarea v-else rows="5" class="answer-box"
-              v-model="f.editAnswer" placeholder="回答を入力..."></textarea>
+              v-model="f.editAnswer" placeholder="脱衣所の引き出しにあります。"></textarea>
 
     <!-- tags -->
-    <small v-if="!f.editing">#{{f.tags||'タグなし'}}</small>
-    <input  v-else class="tag-box" v-model="f.editTags" placeholder="カンマ区切りタグ">
+    <!-- <small v-if="!f.editing">#{{f.tags||'タグなし'}}</small>
+    <input  v-else class="tag-box" v-model="f.editTags" placeholder="カンマ区切りタグ"> -->
   </div>
 </div>
 </main>
@@ -108,6 +107,8 @@ $faqList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <script type="module">
 import {createApp} from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+
+const PAGE_UID = '<?= $pageUid ?>';  // サーバー側で埋め込んだページUID
 
 const raw = <?php echo json_encode($faqList, JSON_UNESCAPED_UNICODE);?>;
 
@@ -169,14 +170,23 @@ createApp({
         editing:true
       });
     },
-
+    endEdit(f) {
+      console.log('[end]', f.id);
+      this.list.forEach(v=>v.editing=false);
+      Object.assign(f,{
+        editQuestion:f.question,
+        editAnswer:f.answer,
+        editTags:f.tags,
+        editing:false
+      });    
+    },
     /* ピン切替 */
     async togglePin(f){
       console.log('[togglePin] id=',f.id,'→',f.pinned?0:1);
       await fetch('/api/faq/save.php',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({mode:'toggle_pin',id:f.id})
+        body:JSON.stringify({mode:'toggle_pin',id:f.id,page_uid:PAGE_UID})
       });
       f.pinned = f.pinned?0:1;
     },
@@ -188,7 +198,7 @@ createApp({
       await fetch('/api/faq/save.php',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({mode:'delete',id})
+        body:JSON.stringify({mode:'delete',id,page_uid:PAGE_UID})
       });
       this.list = this.list.filter(v=>v.id!==id);
     },
@@ -200,7 +210,7 @@ createApp({
       await fetch('/api/faq/save.php',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({mode:mode,id:f.id})
+        body:JSON.stringify({mode:mode,id:f.id,page_uid:PAGE_UID})
       });
       f.state = mode==='archive' ? 'archive' : (f.answer?'reply':'draft');
     },
@@ -211,12 +221,12 @@ createApp({
 
       const body = {
         mode:'update',
+        page_uid: PAGE_UID,
         id:f.id,
         question:f.editQuestion,
         answer:f.editAnswer,
         tags:f.editTags
       };
-
       const res  = await fetch('/api/faq/save.php',{
         method:'POST',
         headers:{'Content-Type':'application/json'},

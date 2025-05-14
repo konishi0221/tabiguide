@@ -28,11 +28,6 @@ gcloud run deploy tabiguide-service \
 
 
 
-
-
-
-
-
 google db
 
 appuser

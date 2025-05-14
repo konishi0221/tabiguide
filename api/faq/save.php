@@ -7,11 +7,13 @@ declare(strict_types=1);
 
 $root = dirname(__DIR__, 2);                     // /workspace
 
+
 require_once $root . '/api/cros.php';
 require_once $root . '/public/core/config.php';
 require_once $root . '/public/core/db.php';
 require_once $root . '/public/core/functions.php';
 require_once $root . '/api/chat/AiClient.php';   //  ← 埋め込み用
+require_once $root . '/public/core/token_usage.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -22,10 +24,20 @@ $pdo  = require $root . '/public/core/db.php';
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 /* ---------- 埋め込みユーティリティ ---------- */
-function makeEmbedding(string $text): string
+/**
+ * makeEmbedding()
+ *   Wraps AiClient embeddings call and ensures cost is recorded via uid.
+ */
+function makeEmbedding(string $uid, string $text): string
 {
     $ai  = new AiClient();
-    $res = $ai->embeddings('text-embedding-3-small', $text);
+    $res = $ai->embeddings('text-embedding-3-small', $text, ['uid' => $uid]);
+
+    if (isset($res['error'])) {
+        error_log('[makeEmbedding] OpenAI err: '.json_encode($res));
+        throw new RuntimeException('Embedding API failed');
+    }
+
     return json_encode($res['data'][0]['embedding'] ?? [], JSON_UNESCAPED_UNICODE);
 }
 
@@ -46,7 +58,11 @@ try {
 
         /* ---------------- 新規作成 ---------------- */
         case 'create':
-            $vec = makeEmbedding($req['question']);      // 埋め込み生成
+            // 質問と回答を連結して埋め込む（Q + "\n" + A 形式で統一）
+            $vec = makeEmbedding(
+                $req['page_uid'],
+                $req['question'] . "\n" . ($req['answer'] ?? '')
+            );
             $pdo->prepare(
                 'INSERT INTO question
                    (page_uid, question, answer, tags, state, embedding)
@@ -65,8 +81,11 @@ try {
         /* ---------------- 更新 -------------------- */
         case 'update':
             /* 毎回作り直しても数 ms 程度なのでシンプルに再生成 */
-            $vec = makeEmbedding($req['question']);
+            // 質問と回答を連結して埋め込む
 
+            error_log('save: ' . $req['page_uid'] . '\n' .  $req['question'] );
+
+            $vec = makeEmbedding($req['page_uid'],  $req['question'] . '\n' .  $req['answer']  );
             $sql = 'UPDATE question
                       SET question = :q,
                           answer   = :a,

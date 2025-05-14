@@ -1,6 +1,13 @@
 <?php
 require_once dirname(__DIR__) . '/../core/dashboard_head.php';
 
+// ページ UID（必須）
+$page_uid = $_GET['page_uid'] ?? null;
+if (!$page_uid) {
+    echo "ページUIDが指定されていません。";
+    exit;
+}
+
 $stmt = $pdo->prepare("SELECT * FROM facility_ai_data WHERE page_uid = ? LIMIT 1");
 $stmt->execute([$page_uid]);
 
@@ -50,19 +57,6 @@ $sections = [
 
 if (!$template) {
     die("❌ JSONの読み込みに失敗しました。中身を確認してください。");
-}
-
-
-
-$page_uid = $_GET['page_uid'] ?? null;
-if (!$page_uid) {
-    echo "ページUIDが指定されていません。";
-    exit;
-}
-
-if (!$data) {
-    echo "この施設のデータが存在しないか、あなたに編集権限がありません。";
-    exit;
 }
 // $sections = array_map(function ($s) use ($template) {
 //   return [

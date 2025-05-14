@@ -6,6 +6,7 @@ error_reporting(E_ALL);
 header('Content-Type: application/json');
 
 require_once $_SERVER['DOCUMENT_ROOT'] . '/core/config.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/core/gcs_helper.php';  // gcsDelete()
 
 // POSTリクエストのみ許可
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -28,36 +29,18 @@ if (!isset($data['type']) || !isset($data['page_uid'])) {
 $type = $data['type'];
 $page_uid = $data['page_uid'];
 
-// ファイルパスの設定
-$base_dir = $_SERVER['DOCUMENT_ROOT'];
-$relative_dir = "/upload/" . $page_uid . "/images";
-$filepath = $base_dir . $relative_dir . '/' . $type . '.png';
+// ---------- GCS オブジェクトキー ----------
+$filename = ($type === 'header_logo' || $type === 'icon')
+    ? "{$type}.png"
+    : "{$type}.jpg";
+$key = "upload/{$page_uid}/images/{$filename}";
 
-error_log("Delete path details:");
-error_log("File path: " . $filepath);
-
-// ファイルの存在確認
-if (!file_exists($filepath)) {
-    error_log("File does not exist: " . $filepath);
-    echo json_encode(['success' => true, 'message' => 'File already deleted']);
-    exit;
-}
-
-// ファイルの削除
 try {
-    if (unlink($filepath)) {
-        error_log("File deleted successfully: " . $filepath);
-        echo json_encode(['success' => true]);
-    } else {
-        error_log("Failed to delete file: " . $filepath);
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Failed to delete file']);
-    }
-} catch (Exception $e) {
-    error_log("Error deleting file: " . $e->getMessage());
+    gcsDelete($key);   // 存在しなくても OK
+    echo json_encode(['success' => true]);
+} catch (Throwable $e) {
+    error_log('delete-image.php: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Error deleting file: ' . $e->getMessage()
-    ]);
-} 
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+}
+exit;

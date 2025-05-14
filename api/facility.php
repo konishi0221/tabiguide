@@ -4,6 +4,7 @@ require_once __DIR__ . '/cros.php';    // ← 先頭に / を付ける
 
 require_once dirname(__DIR__) . '/public/core/config.php';
 require_once dirname(__DIR__) . '/public/core/db.php';
+require_once dirname(__DIR__) . '/public/core/token_usage.php';   // chargeGoogle()
 
 
 $fid  = $_GET['page_uid'] ?? ($_GET['fid'] ?? '');
@@ -62,6 +63,8 @@ curl_setopt_array($ch,[
   CURLOPT_TIMEOUT        => 5,
 ]);
 $res = curl_exec($ch);
+// Cost accounting: 1 Google API call for translation
+chargeGoogle($fid);
 curl_close($ch);
 
 $data = json_decode($res,true);

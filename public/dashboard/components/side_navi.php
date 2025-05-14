@@ -16,7 +16,7 @@ $page_uid_safe = urlencode($page_uid);
   #side_navi {
     width: 240px;
     background: #fff;
-    padding: 20px 0;
+    padding:  0;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     box-sizing: border-box;
     padding-bottom:40px;
@@ -100,32 +100,30 @@ $page_uid_safe = urlencode($page_uid);
 
 <div id="side_navi">
 
+<?php
+  $host = $_SERVER['HTTP_HOST'] ?? '';
+  // ローカル判定（localhost か 127.0.0.1 系）
+  $isLocal = preg_match('/^(localhost|127\.0\.0\.1)/', $host);
 
+  $guest_base_url = $isLocal
+      ? 'http://localhost:5173/'          // 開発環境
+      : 'https://app.tabiguide.net/'; // 本番環境
 
-  <?php
-$host = $_SERVER['HTTP_HOST'] ?? '';
-
-// ローカル判定（localhost か 127.0.0.1 系）
-$isLocal = preg_match('/^(localhost|127\.0\.0\.1)/', $host);
-
-$guest_base_url = $isLocal
-    ? 'http://localhost:5173/'          // 開発環境
-    : 'https://tabiguide-721ec.web.app/'; // 本番環境
-
-$guest_url = $guest_base_url . $page_uid_safe;
+  $guest_url = $guest_base_url . $page_uid_safe;
 ?>
 
-<a href="/dashboard">
+<a href="/dashboard/">
   <h3>
-      <span class="material-symbols-outlined side_icon">dashboard</span>
-      <span class="h3_title">ダッシュボード</span>
+      <span class="material-symbols-outlined side_icon">home</span>
+      <span class="h3_title">管理中の施設一覧へ</span>
   </h3>
 </a>
 
-<a href="<?= htmlspecialchars($guest_url, ENT_QUOTES) ?>"  target="_blank">
+
+<a href="/dashboard/facility/?page_uid=<?= $page_uid_safe ?>">
   <h3>
-      <span class="material-symbols-outlined side_icon">visibility</span>
-      <span class="h3_title">ゲストページ
+      <span class="material-symbols-outlined side_icon">dashboard</span>
+      <span class="h3_title">ダッシュボード</span>
   </h3>
 </a>
 
@@ -141,8 +139,7 @@ $guest_url = $guest_base_url . $page_uid_safe;
 
   <h3><span class="material-symbols-outlined side_icon">map</span><span class="h3_title">マップ作成</span></h3>
   <ul>
-    <li><a href="../stores/list.php?page_uid=<?= $page_uid_safe ?>">登録店舗一覧</a></li>
-    <li><a href="../stores/index.php?page_uid=<?= $page_uid_safe ?>">店舗の追加</a></li>
+    <li><a href="../stores/list.php?page_uid=<?= $page_uid_safe ?>">近所の店舗一覧</a></li>
   </ul>
 
   <h3><span class="material-symbols-outlined side_icon">palette</span><span class="h3_title">ユーザー画面</span></h3>
@@ -154,9 +151,9 @@ $guest_url = $guest_base_url . $page_uid_safe;
   <h3><span class="material-symbols-outlined side_icon">settings</span><span class="h3_title">施設の設定</span></h3>
   <ul>
     <li><a href="../settings/index.php?page_uid=<?= $page_uid_safe ?>">設定画面ヘ</a></li>
+    <li><a href="../billing/index.php?page_uid=<?= $page_uid_safe ?>">決済設定</a></li>
   </ul>
 </div>
-
 
 <script>
 $(function () {

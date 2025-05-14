@@ -91,7 +91,6 @@ if ($result && $result['design_json']) {
 </head>
 <body>
   <?php include(dirname(__DIR__) . '/components/dashboard_header.php'); ?>
-
   <div class="dashboard-container">
     <?php include(dirname(__DIR__) . '/components/side_navi.php'); ?>
     <div id="app">
@@ -103,107 +102,101 @@ if ($result && $result['design_json']) {
           <div class="preview-area">
             <div class="preview-phones">
               <!-- チャットプレビュー -->
-              <div class="phone-wrapper">
-                <div class="phone-frame">
-                  <div class="phone-header">
-                    <div class="phone-notch"></div>
-                  </div>
-                  <div class="phone-content">
-                    <!-- チャット画面 -->
-                    <div class="guest-chat"
-                      :style="{
-                        backgroundImage: preview.background_url 
-                          ? `url('${preview.background_url}')` 
-                          : design.background_url 
-                            ? `url('/upload/${design.page_uid}/images/background.jpg')`
-                            : 'none',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat'
-                      }"
-                    >
-                      <div class="bg-filter"
-                        :style="{
-                          background: hexToRgba(design.bg_filter_color, design.bg_filter_opacity),
-                          backdropFilter: `blur(${design.bg_filter_blur}px)`,
-                          zIndex: 0
-                        }"
-                      ></div>
-                      <!-- ヘッダー -->
-                      <div class="chat-header" :style="{ backgroundColor: design.primary_color }">
-                        <template v-if="preview.header_logo_url">
-                          <div class="header-logo">
-                            <img :src="preview.header_logo_url" alt="施設ロゴ" style="max-height: 40px; max-width: 100%; object-fit: contain;">
-                          </div>
-                        </template>
-                        <template v-else-if="design.header_logo_url">
-                          <div class="header-logo">
-                            <img :src="`/upload/${design.page_uid}/images/header_logo.png?${Date.now()}`" 
-                                 alt="施設ロゴ" 
-                                 style="max-height: 40px; max-width: 100%; object-fit: contain;"
-                                 @error="handleImageError">
-                          </div>
-                        </template>
-                        <h1 v-else :style="{ color: design.header_text_color }">海辺の家</h1>
-                      </div>
+        <div class="phone-wrapper">
+          <div class="phone-frame">
+            <div class="phone-header">
+              <div class="phone-notch"></div>
+            </div>
 
-                      <div class="chat-messages">
-                        <div class="chat-message bot">
-                          <div class="bot-avatar"
-                            :style="{
-                              backgroundImage: preview.icon_url 
-                                ? `url('${preview.icon_url}')` 
-                                : design.icon_url 
-                                  ? `url('/upload/${design.page_uid}/images/icon.png')`
-                                  : 'none',
-                              backgroundColor: '#FFFFFF',
-                              backgroundSize: 'cover',
-                              backgroundPosition: 'center',
-                              backgroundRepeat: 'no-repeat'
-                            }"
-                          ></div>
-                          <div class="message-content" :style="{ color: design.bot_text_color ,  backgroundColor: design.bot_message_color }">
-                            ようこそ〜近くのおすすめグルメや観光スポットもご案内できますので、遠慮なくご相談ください。
-                          </div>
-                        </div>
-                        <div class="chat-message user"  >
-                          <div class="message-content" :style="{ color: design.user_text_color  , backgroundColor: design.user_message_color }">
-                            チェックインの時間を教えてください。
-                          </div>
-                        </div>
-                      </div>
+            <div class="phone-content">
+              <!-- ================= チャットプレビュー ================= -->
+              <div class="guest-chat"
+                   :style="{
+                     backgroundImage: currentBackgroundUrl ? `url('${currentBackgroundUrl}')` : 'none',
+                     backgroundSize: 'cover',
+                     backgroundPosition: 'center',
+                     backgroundRepeat: 'no-repeat'
+                   }">
 
-                      <div class="guest-input" :style="{ backgroundColor: design.input_background_color }">
-                        <input type="text" placeholder="メッセージを入力">
-                        <button :style="{ backgroundColor: design.send_button_bg_color }">
-                          <span class="material-symbols-outlined send" :style="{ color: design.send_button_color }" >send</span>
-                        </button>
-                      </div>
+                <!-- フィルター -->
+                <div class="bg-filter"
+                     :style="{
+                       background: hexToRgba(design.bg_filter_color, design.bg_filter_opacity),
+                       backdropFilter: `blur(${design.bg_filter_blur}px)`,
+                       zIndex: 0
+                     }"></div>
 
-                      <!-- タブバー -->
-                      <div class="guest-tabs" :style="{ backgroundColor: design.secondary_color }">
-                        <button class="tab-button active" :style="{ color: design.tab_active_color }">
-                          <span class="material-symbols-outlined">chat</span>
-                          <span>チャット</span>
-                        </button>
-                        <button class="tab-button" :style="{ color: design.tab_inactive_color }">
-                          <span class="material-symbols-outlined">map</span>
-                          <span>周辺マップ</span>
-                        </button>
-                        <button class="tab-button" :style="{ color: design.tab_inactive_color }">
-                          <span class="material-symbols-outlined">schedule</span>
-                          <span>基本情報</span>
-                        </button>
-                        <button class="tab-button" :style="{ color: design.tab_inactive_color }">
-                          <span class="material-symbols-outlined">translate</span>
-                          <span>翻訳</span>
-                        </button>
-                      </div>
+                <!-- ===== ヘッダー ===== -->
+                <div class="chat-header" :style="{ backgroundColor: design.primary_color }">
+                  <template v-if="currentHeaderLogoUrl">
+                    <div class="header-logo">
+                      <img :src="currentHeaderLogoUrl"
+                           alt="施設ロゴ"
+                           style="max-height: 40px; max-width: 100%; object-fit: contain;"
+                           @error="handleImageError">
+                    </div>
+                  </template>
+                  <h1 v-else :style="{ color: design.header_text_color }">海辺の家</h1>
+                </div>
+
+                <!-- ===== メッセージ ===== -->
+                <div class="chat-messages">
+                  <div class="chat-message bot">
+                    <div class="bot-avatar"
+                         :style="{
+                           backgroundImage: currentIconUrl ? `url('${currentIconUrl}')` : 'none',
+                           backgroundColor: '#FFFFFF',
+                           backgroundSize: 'cover',
+                           backgroundPosition: 'center',
+                           backgroundRepeat: 'no-repeat'
+                         }"></div>
+                    <div class="message-content"
+                         :style="{ color: design.bot_text_color, backgroundColor: design.bot_message_color }">
+                      ようこそ〜近くのおすすめグルメや観光スポットもご案内できますので、遠慮なくご相談ください。
                     </div>
                   </div>
+
+                  <div class="chat-message user">
+                    <div class="message-content"
+                         :style="{ color: design.user_text_color, backgroundColor: design.user_message_color }">
+                      チェックインの時間を教えてください。
+                    </div>
+                  </div>
+                </div><!-- /chat-messages -->
+
+                <!-- ===== 入力エリア ===== -->
+                <div class="guest-input" :style="{ backgroundColor: design.input_background_color }">
+                  <input type="text" placeholder="メッセージを入力">
+                  <button :style="{ backgroundColor: design.send_button_bg_color }">
+                    <span class="material-symbols-outlined send"
+                          :style="{ color: design.send_button_color }">send</span>
+                  </button>
                 </div>
-                <div class="phone-label">チャット画面</div>
-              </div>
+
+                <!-- ===== タブバー ===== -->
+                <div class="guest-tabs" :style="{ backgroundColor: design.secondary_color, color: design.tab_active_color }">
+                  <button class="tab-button active" :style="{ color: design.tab_active_color }">
+                    <span class="material-symbols-outlined" >chat</span><span>チャット</span>
+                  </button>
+                  <button class="tab-button" :style="{ color: design.tab_active_color }">
+                    <span class="material-symbols-outlined">map</span><span>周辺マップ</span>
+                  </button>
+                  <button class="tab-button" :style="{ color: design.tab_active_color }">
+                    <span class="material-symbols-outlined">schedule</span><span>基本情報</span>
+                  </button>
+                  <button class="tab-button" :style="{ color: design.tab_active_color }">
+                    <span class="material-symbols-outlined">translate</span><span>翻訳</span>
+                  </button>
+                </div>
+              </div><!-- /guest-chat -->
+            </div><!-- /phone-content -->
+
+
+
+            
+          </div><!-- /phone-frame -->
+          <div class="phone-label">チャット画面</div>
+        </div><!-- /phone-wrapper -->
             </div>
           </div>
 
@@ -229,12 +222,6 @@ if ($result && $result['design_json']) {
                   <label>メインカラー</label>
                   <div class="color-picker">
                     <input type="color" v-model="design.primary_color">
-                  </div>
-                </div>
-                <div class="color-group">
-                  <label>サブカラー</label>
-                  <div class="color-picker">
-                    <input type="color" v-model="design.secondary_color">
                   </div>
                 </div>
                 <div class="color-group">
@@ -272,6 +259,21 @@ if ($result && $result['design_json']) {
                   </div>
                 </div>
               </div>
+              <!-- Tab active color and サブカラー -->
+              <div class="palette-row">
+                <div class="color-group">
+                  <label>タブアクティブカラー</label>
+                  <div class="color-picker">
+                    <input type="color" v-model="design.tab_active_color">
+                  </div>
+                </div>
+                <div class="color-group">
+                  <label>タブカラー</label>
+                  <div class="color-picker">
+                    <input type="color" v-model="design.secondary_color">
+                  </div>
+                </div>
+              </div>
               <div class="palette-row">
                 <div class="color-group">
                   <label>入力欄背景色</label>
@@ -293,25 +295,24 @@ if ($result && $result['design_json']) {
                 </div>
               </div>
             </div>
-
             <div class="image-preview">
               <h3>画像設定</h3>
               <div class="image-grid">
                 <div class="image-item">
                   <div class="image-upload-area" 
-                       :class="{ 'has-image': preview.icon_url || design.icon_url }"
+                       :class="{ 'has-image': !!design.icon_url }"
                        @click="triggerFileInput('icon')"
-                       :style="{ backgroundImage: preview.icon_url ? `url('${preview.icon_url}')` : design.icon_url ? `url('/upload/${design.page_uid}/images/icon.png')` : 'none' }">
+                       :style="{ backgroundImage: design.icon_url ? `url('${design.icon_url}?v=${cacheStamp}')` : 'none' }">
                     <input type="file" 
                            ref="iconInput" 
                            accept="image/*"
                            @change="handleImageUpload('icon', $event)" 
                            style="display: none">
-                    <span v-if="!preview.icon_url && !design.icon_url" class="upload-placeholder">
+                    <span v-if="!hasIcon" class="upload-placeholder">
                       <span class="material-symbols-outlined">add_photo_alternate</span>
                       <span>アイコンを選択</span>
                     </span>
-                    <button v-if="preview.icon_url || design.icon_url" 
+                    <button v-if="design.icon_url" 
                             class="delete-image-button"
                             @click.stop="deleteImage('icon')">
                       <span class="material-symbols-outlined">delete</span>
@@ -322,19 +323,19 @@ if ($result && $result['design_json']) {
 
                 <div class="image-item">
                   <div class="image-upload-area"
-                       :class="{ 'has-image': preview.background_url || design.background_url }"
+                       :class="{ 'has-image': !!design.background_url }"
                        @click="triggerFileInput('background')"
-                       :style="{ backgroundImage: preview.background_url ? `url('${preview.background_url}')` : design.background_url ? `url('/upload/${design.page_uid}/images/background.png')` : 'none' }">
+                       :style="{ backgroundImage: design.background_url ? `url('${design.background_url}?v=${cacheStamp}')` : 'none' }">
                     <input type="file" 
                            ref="backgroundInput" 
                            accept="image/*"
                            @change="handleImageUpload('background', $event)" 
                            style="display: none">
-                    <span v-if="!preview.background_url && !design.background_url" class="upload-placeholder">
+                    <span  v-if="!hasBackground" class="upload-placeholder">
                       <span class="material-symbols-outlined">add_photo_alternate</span>
                       <span>背景画像を選択</span>
                     </span>
-                    <button v-if="preview.background_url || design.background_url" 
+                    <button v-if="design.background_url" 
                             class="delete-image-button"
                             @click.stop="deleteImage('background')">
                       <span class="material-symbols-outlined">delete</span>
@@ -343,21 +344,22 @@ if ($result && $result['design_json']) {
                   <span>チャット背景</span>
                 </div>
 
+                
                 <div class="image-item">
                   <div class="image-upload-area"
-                       :class="{ 'has-image': preview.header_logo_url || design.header_logo_url }"
+                       :class="{ 'has-image': !!design.header_logo_url }"
                        @click="triggerFileInput('header_logo')"
-                       :style="{ backgroundImage: preview.header_logo_url ? `url('${preview.header_logo_url}')` : design.header_logo_url ? `url('/upload/${design.page_uid}/images/header_logo.png')` : 'none' }">
+                       :style="{ backgroundImage: design.header_logo_url ? `url('${design.header_logo_url}?v=${cacheStamp}')` : 'none' }">
                     <input type="file" 
                            ref="header_logoInput" 
                            accept="image/*"
                            @change="handleImageUpload('header_logo', $event)" 
                            style="display: none">
-                    <span v-if="!preview.header_logo_url && !design.header_logo_url" class="upload-placeholder">
+                    <span v-if="!hasHeaderLogo" class="upload-placeholder">
                       <span class="material-symbols-outlined">add_photo_alternate</span>
                       <span>ヘッダーロゴを選択</span>
                     </span>
-                    <button v-if="preview.header_logo_url || design.header_logo_url" 
+                    <button v-if="design.header_logo_url" 
                             class="delete-image-button"
                             @click.stop="deleteImage('header_logo')">
                       <span class="material-symbols-outlined">delete</span>
@@ -405,37 +407,51 @@ if ($result && $result['design_json']) {
     </div>
   </div>
 
-
   <script>
     const app = Vue.createApp({
         data() {
             return {
                 design: <?php echo json_encode($design); ?>,
-                preview: {
-                    icon_url: null,
-                    background_url: null,
-                    header_logo_url: null
-                },
                 templates: null,
                 availableFonts: [
                     { name: 'Noto Sans JP', value: 'Noto Sans JP' },
                     { name: 'M PLUS 1p', value: 'M PLUS 1p' },
                     { name: 'Zen Kaku Gothic New', value: 'Zen Kaku Gothic New' },
                     { name: 'BIZ UDPGothic', value: 'BIZ UDPGothic' }
-                ]
+                ],
+                hasIcon: false,
+                hasBackground: false,
+                hasHeaderLogo: false,
+                cacheStamp: Date.now(),
             };
         },
         computed: {
-            effectiveIconUrl() {
-                return this.preview.icon_url || this.design.icon_url;
-            },
-            effectiveBackgroundUrl() {
-                return this.preview.background_url || this.design.background_url;
-            }
+          currentIconUrl() {
+            return this.design.icon_url
+              ? `${this.design.icon_url}?v=${this.cacheStamp}`
+              : null
+          },
+          currentBackgroundUrl() {
+            return this.design.background_url
+              ? `${this.design.background_url}?v=${this.cacheStamp}`
+              : null
+          },
+          currentHeaderLogoUrl() {
+            return this.design.header_logo_url
+              ? `${this.design.header_logo_url}?v=${this.cacheStamp}`
+              : null
+          }
         },
         methods: {
             triggerFileInput(type) {
                 this.$refs[`${type}Input`].click();
+            },
+            check(url, cb) {
+              if (!url) { cb(false); return }
+              const img = new Image()
+              img.onload  = () => cb(true)
+              img.onerror = () => cb(false)
+              img.src = url
             },
             async handleImageUpload(type, event) {
                 const file = event.target.files[0];
@@ -459,10 +475,6 @@ if ($result && $result['design_json']) {
                 }
 
                 try {
-                    // プレビュー用のURL生成
-                    const previewUrl = URL.createObjectURL(file);
-                    this.preview[`${type}_url`] = previewUrl;
-
                     // アップロード処理
                     const formData = new FormData();
                     formData.append('image', file);
@@ -476,8 +488,9 @@ if ($result && $result['design_json']) {
                     });
                     
                     if (response.data.success) {
-                        // 画像のアップロードが成功したら、design.header_logo_urlをtrueに設定
-                        this.design[`${type}_url`] = true;
+                        // 保存は純 URL
+                        this.design[`${type}_url`] = response.data.url;   // 保存は純 URL
+                        this.cacheStamp = Date.now();                    // キャッシュバスター更新
                         console.log(`${type} 画像のアップロードに成功`);
                     } else {
                         throw new Error(response.data.message || 'アップロードに失敗しました');
@@ -485,13 +498,10 @@ if ($result && $result['design_json']) {
                 } catch (error) {
                     console.error('アップロードエラーの詳細:', error.response?.data || error);
                     alert(`画像のアップロードに失敗しました: ${error.response?.data?.message || error.message}`);
-                    this.preview[`${type}_url`] = null;
-                    if (this.preview[`${type}_url`]) {
-                        URL.revokeObjectURL(this.preview[`${type}_url`]);
-                    }
                 }
             },
             async saveDesign() {
+              
                 try {
                     // 保存前にbg_filter_colorをrgba形式に変換
                     const designData = { ...this.design };
@@ -557,12 +567,9 @@ if ($result && $result['design_json']) {
                     });
                     
                     if (response.data.success) {
-                        // プレビューと設定をクリア
-                        this.preview[`${type}_url`] = null;
+                        // 設定をクリア
                         this.design[`${type}_url`] = null;  // nullに設定
-                        if (this.preview[`${type}_url`]) {
-                            URL.revokeObjectURL(this.preview[`${type}_url`]);
-                        }
+                        this.cacheStamp = Date.now();
                         console.log(`${type} 画像の削除に成功`);
                     } else {
                         throw new Error(response.data.message || '削除に失敗しました');
@@ -593,17 +600,28 @@ if ($result && $result['design_json']) {
             }
         },
         watch: {
-            'preview.background_url': function(newVal) {
-                console.log('background_url プレビュー変更:', newVal ? newVal.substring(0, 100) + '...' : 'null');
+            'design.icon_url': {
+              immediate: true,
+              handler(url){
+                this.cacheStamp = Date.now();
+                console.log('icon_url 本番変更:', url)
+                this.check(url, v => (this.hasIcon = v))
+              }
             },
-            'preview.icon_url': function(newVal) {
-                console.log('icon_url プレビュー変更:', newVal ? newVal.substring(0, 100) + '...' : 'null');
+            'design.background_url': {
+              immediate: true,
+              handler(url){
+                this.cacheStamp = Date.now();
+                console.log('background_url 本番変更:', url)
+                this.check(url, v => (this.hasBackground = v))
+              }
             },
-            'design.background_url': function(newVal) {
-                console.log('background_url 本番変更:', newVal);
-            },
-            'design.icon_url': function(newVal) {
-                console.log('icon_url 本番変更:', newVal);
+            'design.header_logo_url': {
+              immediate: true,
+              handler(url){
+                this.cacheStamp = Date.now();
+                this.check(url, v => (this.hasHeaderLogo = v))
+              }
             }
         },
         mounted() {
@@ -614,21 +632,7 @@ if ($result && $result['design_json']) {
                 this.design.bg_filter_color = rgbaValues.color;
                 this.design.bg_filter_opacity = rgbaValues.opacity;
             }
-
-            // ヘッダーロゴの存在確認
-            const headerLogoImg = new Image();
-            headerLogoImg.onload = () => {
-                this.design.header_logo_url = true;
-            };
-            headerLogoImg.onerror = () => {
-                this.design.header_logo_url = false;
-            };
-            headerLogoImg.src = `/upload/${this.design.page_uid}/images/header_logo.png?${Date.now()}`;
-
-            console.log('初期状態:', {
-                preview: this.preview,
-                design: this.design
-            });
+            console.log('初期状態:', this.design);
         }
     }).mount('#app');
   </script>

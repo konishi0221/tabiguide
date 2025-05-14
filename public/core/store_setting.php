@@ -8,6 +8,7 @@ if (!defined('BASE_PATH')) {
 require_once BASE_PATH . '/core/db.php';
 require_once BASE_PATH . '/core/config.php';
 require_once BASE_PATH . '/core/category.php';
+require_once BASE_PATH . '/core/token_usage.php';
 
 function previewNearbyStores($page_uid) {
     global $pdo, $GOOGLE_MAPS_API_KEY, $category_list;
@@ -47,6 +48,8 @@ function previewNearbyStores($page_uid) {
 
     echo "<h1>📍「{$page_uid}」の周辺施設候補</h1>";
 
+    $mapsLoads = 0;
+
     foreach ($category_list as $key => $info) {
         $googleType = $keyToGoogleType[$key] ?? null;
         if (!$googleType) continue;
@@ -54,6 +57,7 @@ function previewNearbyStores($page_uid) {
         $radius = 1000;
         $url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={$lat},{$lng}&radius={$radius}&type={$googleType}&language=ja&key={$GOOGLE_MAPS_API_KEY}";
         $res = json_decode(file_get_contents($url), true);
+        $mapsLoads++;
 
         echo "<h2>{$info['name']} ({$key})</h2>";
 
@@ -115,5 +119,10 @@ function previewNearbyStores($page_uid) {
             echo "</li>";
         }
         echo "</ul>";
+    }
+
+    // ---- Google Maps API cost accounting ----
+    if (function_exists('chargeGoogleMaps') && $mapsLoads > 0) {
+        chargeGoogleMaps($page_uid, $mapsLoads);
     }
 }

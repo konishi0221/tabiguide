@@ -1,10 +1,10 @@
 {
   "基本情報": {
-    "施設名": "満竹華庵 上野 EAST",
+    "施設名": "渋谷HOUSE",
     "施設タイプ": ["minpaku", "hotel", "ryokan", "camp"],
     "紹介文": {
       "type": "textarea",
-      "rows": 4,
+      "rows": 6,
       "placeholder": "駅徒歩1分、全室バスルーム付きの和モダン旅館です。"
     }
   },
@@ -16,13 +16,11 @@
     "住所": "東京都台東区上野7-1-1",
     "電話番号": "03-1234-5678",
     "メール": "info@example.com",
-    "公式サイト": "https://example.com"
-  },
-  "rooms": [],
-  "base_notes": "",
-  "amenities_notes": "",
-  "rule_notes": "",
-  "location_notes": "",
-  "appeal_notes": "",
-  "others_notes": ""
+    "公式サイト": "https://example.com",
+    "備考": {
+      "type": "textarea",
+      "rows": 4,
+      "placeholder": "その他の連絡事項を入力してください。"
+    }
+  }
 }

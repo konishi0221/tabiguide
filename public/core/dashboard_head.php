@@ -6,6 +6,12 @@ if (empty($_SESSION['lang'])) {
     $_SESSION['lang'] = 'JP';
 }
 
+// ---- debug: file reached ----
+error_log(sprintf('[%s] dashboard_head.php reached, uid=%s, page_uid=%s',
+                  date('Y-m-d H:i:s'),
+                  $_SESSION['user']['uid'] ?? 'guest',
+                  $_GET['page_uid'] ?? 'none'));
+
 // 未ログインならログインページへリダイレクト
 if (!isset($_SESSION['user']['uid'])) {
     header('Location: /login/');
@@ -15,12 +21,12 @@ if (!isset($_SESSION['user']['uid'])) {
 $currentUser = $_SESSION['user'];
 
 // 必要なファイル読み込み
-require_once __DIR__ . '/../core/functions.php';   // 共通関数など
+require_once __DIR__ . '/functions.php';   // 共通関数など
 
 // ユーザー情報を変数化（便利なので）
-require_once __DIR__ . '/../core/db.php';
-require_once __DIR__ . '/../core/config.php';
-require_once __DIR__ . '/../core/category.php';
+require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/category.php';
 
 if (!empty($_GET['page_uid'])) {
     $page_uid = $_GET['page_uid'];
@@ -28,6 +34,10 @@ if (!empty($_GET['page_uid'])) {
 
     $access_role = getAccessRole($pdo, $page_uid, $user_uid);
     if (!$access_role) {
+        error_log(sprintf('[%s] access denied, uid=%s, page_uid=%s',
+                          date('Y-m-d H:i:s'),
+                          $user_uid,
+                          $page_uid));
         header('Location: /dashboard/');
         exit;
     }

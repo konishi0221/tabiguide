@@ -7,6 +7,22 @@ class PromptBuilder
     private string $chatHeader;  // チャット用ヘッダー
     private string $callHeader;  // 電話用ヘッダー
 
+    /** 言語コードを日本語名にマッピング */
+    private function langName(string $code): string
+    {
+        return match($code) {
+            'en'  => '英語',
+            'ko'  => '韓国語',
+            'zh'  => '中国語',
+            'zht' => '繁体字中国語',
+            'th'  => 'タイ語',
+            'vi'  => 'ベトナム語',
+            'id'  => 'インドネシア語',
+            'es'  => 'スペイン語',
+            default => '日本語',
+        };
+    }
+
     public function __construct(array $base, string $char, string $promptDir)
     {
         $this->base       = $base;
@@ -32,6 +48,12 @@ class PromptBuilder
               . "\n\n<!--基本情報-->\n" . json_encode($this->base, JSON_UNESCAPED_UNICODE)
               . "\n\n<!--ゲストの情報-->\n" . json_encode($ctx,  JSON_UNESCAPED_UNICODE)
               . "\n\n<!--あなたのキャラクター-->\n" . $this->char;
+        // // 言語指定があれば指示を追加
+        if (!empty($ctx['lang']) && $ctx['lang'] !== 'ja') {
+            $tmpl .= "\n\n" .
+                     $this->langName($ctx['lang']) .
+                     'で答えてください。';
+        }
 
         return $tmpl;
     }

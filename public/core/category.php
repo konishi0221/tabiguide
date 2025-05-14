@@ -42,13 +42,6 @@ $category_list = [
     'icon' => 'local_dining',
     'color' => '#795548', // ブラウン（料理感）
   ],
-  // 'ramen' => [
-  //   'id' => 'ramen',
-  //   'name' => 'ラーメン',
-  //   'en_name' => 'Ramen',
-  //   'icon' => 'ramen_dining',
-  //   'color' => '#ffc107', // 黄金色（麺系の食欲色）
-  // ],
   'cafe' => [
     'id' => 'cafe',
     'name' => 'カフェ',

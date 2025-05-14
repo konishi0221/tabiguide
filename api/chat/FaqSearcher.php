@@ -15,21 +15,28 @@ class FaqSearcher
         $query = trim($query);
         if ($query === '') return null;
 
+        error_log($query);
         /* 1) ベクトル検索を試す -------------- */
         $rows = self::vectorSearch($pdo, $pageUid, $query);
+        /* ---- debug: log each hit row ---- */
+        if ($rows) {
+            foreach ($rows as $hit) {
+                error_log('[FaqSearcher] hit='.json_encode($hit, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+            }
+        }
         if ($rows) return $rows;                     // ヒットがあれば確定
         
+        return $rows;
         /* 2) ヒット薄なら FULLTEXT へ ---------- */
-        return self::fulltextSearch($pdo, $pageUid, $query);
+        // return self::fulltextSearch($pdo, $pageUid, $query);
     }
 
     /* ---------------- ベクトル検索 ---------------- */
     private static function vectorSearch(PDO $pdo, string $uid, string $q): ?array
     {
 
-        
-
-        $vec = self::embedding($q);                  // 1536 次元 array
+    
+        $vec = self::embedding($uid, $q);            // 1536 次元 array
         if (!$vec) return null;
         
         $st = $pdo->prepare(
@@ -41,18 +48,15 @@ class FaqSearcher
         $st->execute([$uid]);
         $hits = [];
         while ($row = $st->fetch(PDO::FETCH_ASSOC)) {
-            if ($row['embedding'] === null) continue;
-
-            // error_log('[null emb] '.$row['id']);     // ← embedding が空
-            
-            
+            if ($row['embedding'] === null) continue;            
+            error_log($row['question']);
 
             $e = json_decode($row['embedding'], true) ?: [];
             if (count($e) !== count($vec)) continue;
 
             $score = self::cosine($vec, $e);
 
-            if ($score > 0.5) {                     // 閾値は適宜
+            if ($score > 0.01) {                     // 閾値は適宜
                 $row['score'] = $score;
                 unset($row['embedding']);         // ← 追加
                 $hits[] = $row;
@@ -90,11 +94,11 @@ class FaqSearcher
     }
 
     /* ---------------- util ---------------- */
-    private static function embedding(string $text): ?array
+    private static function embedding(string $uid, string $text): ?array
     {
         try {
             $ai  = new AiClient();
-            $res = $ai->embeddings('text-embedding-3-small', $text);
+            $res = $ai->embeddings('text-embedding-3-small', $text, ['uid' => $uid]);
             return $res['data'][0]['embedding'] ?? null;
         } catch (\Throwable $e) {
             error_log('[embed] '.$e->getMessage());

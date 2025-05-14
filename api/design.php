@@ -15,6 +15,7 @@
 header('Content-Type: application/json; charset=UTF-8');
 
 $pageUid = $_GET['page_uid'] ?? '';
+
 if ($pageUid === '') {
     http_response_code(400);
     echo json_encode(['error'=>'page_uid が必要です'], JSON_UNESCAPED_UNICODE);
@@ -35,7 +36,8 @@ $row = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$row) {
     $row = [
         'chat_charactor'     => 'ふつうの丁寧語',
-        'chat_first_message' => 'こんにちは！ご質問があればどうぞ！'
+        'chat_first_message' => 'こんにちは！ご質問があればどうぞ！',
+        'voice_first_message' => 'こんにちは！ご質問があればどうぞ！'
     ];
 }
 

@@ -18,9 +18,11 @@ if (!$data || !isset($data['design']) || !isset($data['design']['page_uid'])) {
     exit;
 }
 
+
 try {
     $design = $data['design'];
     $page_uid = $design['page_uid'];
+    $voice_first = $design['voice_first_message'] ?? '';
 
     // 必須フィールドの検証
     $required_fields = [
@@ -43,19 +45,22 @@ try {
         }
     }
 
-    // データベースに保存
+    // データベースに保存 (INSERT or UPDATE)
+    $design_json = json_encode($design, JSON_UNESCAPED_UNICODE);
+
     $stmt = $pdo->prepare("
-        UPDATE design 
-        SET design_json = :design_json,
-            updated_at = NOW()
-        WHERE page_uid = :page_uid
+        INSERT INTO design (page_uid, design_json, voice_first_message, created_at, updated_at)
+        VALUES (:page_uid, :design_json, :voice_first, NOW(), NOW())
+        ON DUPLICATE KEY UPDATE
+            design_json = VALUES(design_json),
+            voice_first_message = VALUES(voice_first_message),
+            updated_at  = NOW()
     ");
 
-    $design_json = json_encode($design);
-    
     $stmt->bindParam(':page_uid', $page_uid);
     $stmt->bindParam(':design_json', $design_json);
-    
+    $stmt->bindParam(':voice_first', $voice_first);
+
     if ($stmt->execute()) {
         echo json_encode([
             'success' => true,

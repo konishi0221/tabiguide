@@ -41,12 +41,16 @@ define('DB_USER', getenv('DB_USER') ?: 'root');
 define('DB_PASS', getenv('DB_PASS') ?: '');
 
 define('OPENAI_API_KEY', getenv('OPENAI_API_KEY') ?: '');
+define('STRIPE_WEBHOOK_SECRET', getenv('STRIPE_WEBHOOK_SECRET') ?: '');
+define('STRIPE_SECRET_KEY', getenv('STRIPE_SECRET_KEY') ?: '');
+
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $allowed = [
     'http://localhost:5173',
     'https://app.tabiguide.net',
     'https://tabiguide-721ec.web.app',
+    'https://localhost:8080',
 ];
 if (in_array($origin, $allowed, true)) {
     header("Access-Control-Allow-Origin: $origin");
@@ -58,3 +62,4 @@ if (!defined('BASE_PATH')) {
 
 define('GOOGLE_MAPS_API_KEY', getenv('GOOGLE_MAPS_API_KEY') );
 $GOOGLE_MAPS_API_KEY = GOOGLE_MAPS_API_KEY;   // 変数でも使いたい場合
+$openai_key = OPENAI_API_KEY;

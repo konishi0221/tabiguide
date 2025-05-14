@@ -1,282 +1,113 @@
 <?php
-// アップロード制限の設定
+// ---------------------------------------------
+//  design/upload-image.php  ― GCS 版
+// ---------------------------------------------
 ini_set('upload_max_filesize', '20M');
-ini_set('post_max_size', '20M');
-ini_set('memory_limit', '256M');
-ini_set('max_execution_time', '300');
-ini_set('max_input_time', '300');
-
-// エラー表示を有効化
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+ini_set('post_max_size',        '20M');
+ini_set('memory_limit',         '256M');
+ini_set('max_execution_time',   '300');
+ini_set('max_input_time',       '300');
 
 header('Content-Type: application/json');
+ini_set('display_errors', '1');
+error_reporting(E_ALL);
 
-// config.phpのパスを修正
 require_once $_SERVER['DOCUMENT_ROOT'] . '/core/config.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/core/functions.php';   // processImage()
+require_once $_SERVER['DOCUMENT_ROOT'] . '/core/gcs_helper.php';  // gcsUpload(), gcsDelete()
 
-// POSTリクエストのみ許可
+// --- メソッドチェック ---
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    error_log("Invalid request method: " . $_SERVER['REQUEST_METHOD']);
     http_response_code(405);
     echo json_encode(['success' => false, 'message' => 'Method not allowed']);
     exit;
 }
 
-// 必要なパラメータのチェック
-error_log("FILES: " . print_r($_FILES, true));
-error_log("POST: " . print_r($_POST, true));
-
-if (!isset($_FILES['image']) || !isset($_POST['type']) || !isset($_POST['page_uid'])) {
-    $missing = [];
-    if (!isset($_FILES['image'])) $missing[] = 'image';
-    if (!isset($_POST['type'])) $missing[] = 'type';
-    if (!isset($_POST['page_uid'])) $missing[] = 'page_uid';
-    
-    error_log("Missing parameters: " . implode(', ', $missing));
+// --- パラメータ取得 ---
+if (!isset($_FILES['image'], $_POST['type'], $_POST['page_uid'])) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Missing required parameters: ' . implode(', ', $missing)]);
+    echo json_encode(['success' => false, 'message' => 'Missing parameters']);
     exit;
 }
 
-$image = $_FILES['image'];
-$type = $_POST['type'];
+$image    = $_FILES['image'];
+$type     = $_POST['type'];        // icon | background | header_logo
 $page_uid = $_POST['page_uid'];
 
-// 画像アップロードエラーのチェック
+// 透過 (PNG/GIF) を保持するか判定
+$mime = $image['type'] ?? '';
+$ext  = strtolower(pathinfo($image['name'] ?? '', PATHINFO_EXTENSION));
+$isPng = str_contains($mime, 'png') || str_contains($mime, 'gif') || $ext === 'png' || $ext === 'gif';
+
+// --- アップロードエラー ---
 if ($image['error'] !== UPLOAD_ERR_OK) {
-    $error_message = match($image['error']) {
-        UPLOAD_ERR_INI_SIZE => 'The uploaded file exceeds the upload_max_filesize directive in php.ini',
-        UPLOAD_ERR_FORM_SIZE => 'The uploaded file exceeds the MAX_FILE_SIZE directive that was specified in the HTML form',
-        UPLOAD_ERR_PARTIAL => 'The uploaded file was only partially uploaded',
-        UPLOAD_ERR_NO_FILE => 'No file was uploaded',
-        UPLOAD_ERR_NO_TMP_DIR => 'Missing a temporary folder',
-        UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk',
-        UPLOAD_ERR_EXTENSION => 'A PHP extension stopped the file upload',
-        default => 'Unknown upload error'
-    };
-    error_log("Upload error: " . $error_message);
     http_response_code(400);
-    echo json_encode(['success' => false, 'message' => $error_message]);
+    echo json_encode(['success' => false, 'message' => 'Upload error']);
     exit;
 }
 
-// 画像タイプの検証
-$allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
-if (!in_array($image['type'], $allowed_types)) {
-    error_log("Invalid file type: " . $image['type']);
+// --- バリデーション ---
+$allowed_types = [
+    'image/jpeg', 'image/pjpeg',
+    'image/png',  'image/x-png',
+    'image/gif'
+];
+if (!in_array($image['type'], $allowed_types, true)) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Invalid file type: ' . $image['type']]);
+    echo json_encode(['success' => false, 'message' => 'Invalid file type']);
     exit;
 }
-
-// ファイルサイズの検証（5MB）
-if ($image['size'] > 5 * 1024 * 1024) {
-    error_log("File too large: " . $image['size'] . " bytes");
+if ($image['size'] > 5 * 1024 * 1024) {        // 5 MB
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'File too large']);
     exit;
 }
 
-// 保存ディレクトリのパス設定
-$base_dir = $_SERVER['DOCUMENT_ROOT'];
-$relative_dir = "/upload/" . $page_uid . "/images";
-$upload_dir = $base_dir . $relative_dir;
-$filename = ($type === 'header_logo' || $type === 'icon') ? $type . '.png' : $type . '.jpg';  // ヘッダーロゴとアイコンはPNG、他はJPG
-$filepath = $upload_dir . '/' . $filename;
-
-error_log("Upload path details:");
-error_log("Base directory: " . $base_dir);
-error_log("Relative directory: " . $relative_dir);
-error_log("Upload directory: " . $upload_dir);
-error_log("File path: " . $filepath);
-error_log("Temporary file: " . $image['tmp_name']);
-
-// 保存ディレクトリの作成
-if (!file_exists($upload_dir)) {
-    error_log("Creating directory: " . $upload_dir);
-    if (!mkdir($upload_dir, 0777, true)) {
-        $error = error_get_last();
-        error_log("Failed to create directory: " . $upload_dir . " - Error: " . ($error ? $error['message'] : 'Unknown error'));
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Failed to create upload directory: ' . $error['message']]);
-        exit;
-    }
-    chmod($upload_dir, 0777);
-    error_log("Directory created successfully");
+// --- 保存キーと拡張子 ---
+// icon / header_logo は常に PNG（透過保持）
+// background は元が PNG/GIF なら PNG、それ以外は JPG
+if ($type === 'icon' || $type === 'header_logo' || $isPng) {
+    $filename = "{$type}.png";
+} else {
+    $filename = "{$type}.jpg";
 }
+$key = "upload/{$page_uid}/images/{$filename}";
 
-// ディレクトリのパーミッションを確認
-if (!is_writable($upload_dir)) {
-    error_log("Directory not writable: " . $upload_dir);
-    http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Upload directory is not writable']);
-    exit;
-}
-
-// 既存のファイルを削除
-if (file_exists($filepath)) {
-    if (!unlink($filepath)) {
-        error_log("Failed to delete existing file: " . $filepath);
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Failed to delete existing file']);
-        exit;
-    }
-}
-
-// 画像のリサイズと保存
+// --- 画像処理 & アップロード ---
 try {
-    // 元画像の読み込み
-    $source_image = null;
-    switch($image['type']) {
-        case 'image/jpeg':
-            $source_image = imagecreatefromjpeg($image['tmp_name']);
-            break;
-        case 'image/png':
-            $source_image = imagecreatefrompng($image['tmp_name']);
-            break;
-        case 'image/gif':
-            $source_image = imagecreatefromgif($image['tmp_name']);
-            break;
-    }
+    $bin = file_get_contents($image['tmp_name']);
 
-    if (!$source_image) {
-        throw new Exception('Failed to create image resource');
-    }
+    // リサイズ・回転補正
+    $processed = ($type === 'icon')
+        ? processImage($bin, 200, 'square')     // 正方形 200 px
+        : processImage($bin, 1200, 'default');  // 最大幅 1200 px
 
-    // 元のサイズを取得
-    $width = imagesx($source_image);
-    $height = imagesy($source_image);
-
-    // リサイズ後のサイズを計算
-    if ($type === 'icon') {
-        $dst_size = 200;              // 仕上がり 200px
-
-        // アイコン用キャンバス（透過 PNG）
-        $new_image = imagecreatetruecolor($dst_size, $dst_size);
-        imagealphablending($new_image, false);
-        imagesavealpha($new_image, true);
-        $transparent = imagecolorallocatealpha($new_image, 0, 0, 0, 127);
-        imagefilledrectangle($new_image, 0, 0, $dst_size, $dst_size, $transparent);
-    
-        // 元画像のアスペクト比を維持しながら、短辺が200px以上になるようにリサイズ
-        if ($width / $height > 1) {  // 横長画像
-            $temp_height = $dst_size;
-            $temp_width = (int)($width * ($dst_size / $height));
-        } else {  // 縦長画像または正方形
-            $temp_width = $dst_size;
-            $temp_height = (int)($height * ($dst_size / $width));
-        }
-
-        // 中心部分の座標を計算
-        $src_x = (int)(($temp_width - $dst_size) / 2);
-        $src_y = (int)(($temp_height - $dst_size) / 2);
-    
-        // 一時的な画像を作成
-        $temp_image = imagecreatetruecolor($temp_width, $temp_height);
-        
-        // 一時画像の透明度を設定
-        imagealphablending($temp_image, false);
-        imagesavealpha($temp_image, true);
-        $transparent = imagecolorallocatealpha($temp_image, 0, 0, 0, 127);
-        imagefilledrectangle($temp_image, 0, 0, $temp_width, $temp_height, $transparent);
-        
-        // 元画像を一時的な画像にリサイズ
-        imagecopyresampled(
-            $temp_image, $source_image,
-            0, 0,
-            0, 0,
-            $temp_width, $temp_height,
-            $width, $height
-        );
-        
-        // 中心部分を切り取って最終的な画像に配置
-        imagecopyresampled(
-            $new_image, $temp_image,
-            0, 0,                    // 出力先の座標
-            $src_x, $src_y,         // 入力元の座標（中心部分）
-            $dst_size, $dst_size,   // 出力先のサイズ
-            $dst_size, $dst_size    // 入力元から取得するサイズ
-        );
-    
-        // 一時的な画像を破棄
-        imagedestroy($temp_image);
-        
-        imagepng($new_image, $filepath, 9);
-        
-        // リソースの解放
-        imagedestroy($source_image);
-        imagedestroy($new_image);
-
-        // 成功レスポンス
-        echo json_encode([
-            'success' => true,
-            'url' => "/upload/{$page_uid}/images/{$filename}"
-        ]);
-        exit;  // アイコン処理完了後は終了
+    if ($type === 'icon' || $type === 'header_logo' || $isPng) {
+        // 必ず PNG として保存（透過保持）
+        $im = imagecreatefromstring($processed);
+        imagealphablending($im, false);           // 透過ピクセルを維持
+        imagesavealpha($im, true);                // 透過を保持
+        ob_start();
+        imagepng($im);
+        $processed = ob_get_clean();
+        imagedestroy($im);
     } else {
-        // 他の画像は従来通り
-        $max_size = 1200;
-        if ($width > $max_size || $height > $max_size) {
-            if ($width > $height) {
-                $new_width = $max_size;
-                $new_height = floor($height * ($max_size / $width));
-            } else {
-                $new_height = $max_size;
-                $new_width = floor($width * ($max_size / $height));
-            }
-        } else {
-            $new_width = $width;
-            $new_height = $height;
-        }
+        // 背景など JPG 保存
+        $im = imagecreatefromstring($processed);
+        ob_start();
+        imagejpeg($im, null, 95);
+        $processed = ob_get_clean();
+        imagedestroy($im);
     }
 
-    // 新しい画像を作成
-    $new_image = imagecreatetruecolor($new_width, $new_height);
+    // 既存オブジェクト削除 → アップロード
+    gcsDelete($key);
+    $url = gcsUpload($processed, $key);
 
-    // PNGの場合は透明度を保持
-    if ($type === 'header_logo' || $type === 'icon') {
-        // アルファチャンネルを有効化
-        imagealphablending($new_image, false);
-        imagesavealpha($new_image, true);
-        // 透明な背景を設定
-        $transparent = imagecolorallocatealpha($new_image, 0, 0, 0, 127);
-        imagefilledrectangle($new_image, 0, 0, $new_width, $new_height, $transparent);
-    } else {
-        // JPGの場合は白背景
-        $white = imagecolorallocate($new_image, 255, 255, 255);
-        imagefill($new_image, 0, 0, $white);
-    }
-
-    // リサイズ
-    imagecopyresampled(
-        $new_image, $source_image,
-        0, 0, 0, 0,
-        $new_width, $new_height,
-        $width, $height
-    );
-
-    // 保存（ヘッダーロゴとアイコンはPNG、その他はJPG）
-    if ($type === 'header_logo' || $type === 'icon') {
-        imagepng($new_image, $filepath, 9); // 0-9の圧縮レベル、9が最高品質
-    } else {
-        imagejpeg($new_image, $filepath, 95);
-    }
-
-    // リソースの解放
-    imagedestroy($source_image);
-    imagedestroy($new_image);
-
-    // 成功レスポンス
-    echo json_encode([
-        'success' => true,
-        'url' => "/upload/{$page_uid}/images/{$filename}"
-    ]);
-
-} catch (Exception $e) {
+    echo json_encode(['success' => true, 'url' => $url]);
+} catch (Throwable $e) {
+    error_log('upload-image.php: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Failed to process image: ' . $e->getMessage()
-    ]);
-} 
+    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+}
+exit;

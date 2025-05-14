@@ -71,7 +71,7 @@ foreach ($ownerFacilities as $f) {
   <div class="card-grid" v-else>
       
     <div v-for="f in facilities" :key="f.page_uid" >
-      <a :href="'/dashboard/ai/base.php?page_uid=' + f.page_uid">
+      <a :href="'/dashboard/facility/?page_uid=' + encodeURIComponent(f.page_uid)">
         <div
           class="card"
           :class="f._role">
@@ -87,12 +87,10 @@ foreach ($ownerFacilities as $f) {
             <span class="role-tag" v-else>スタッフ</span>
           </h3>
           <p>ID: {{ f.page_uid }}</p>
-          <a :href="'/dashboard/ai/base.php?page_uid=' + f.page_uid">この施設を管理する</a>
         </div>
       </a>
     </div>
   </div>
-
 
   <!-- モーダル -->
   <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
@@ -136,7 +134,7 @@ createApp({
           'page_uid' => $f['page_uid'],
           '_role' => $f['_role'] ?? 'staff',
           'logo_base64' => $f['logo_base64'] ?? null,
-          'primary_color' => $f['primary_color'] ?? '#cccccc',
+          'primary_color' => $f['primary_color'] ?? '#cccccc'
         ];
       }, $allFacilities), JSON_UNESCAPED_UNICODE); ?>,
       showModal: false,
@@ -149,7 +147,7 @@ createApp({
       // 仮のuid=new で空状態に飛ばす or その場で新規作成API叩いてもOK
       window.location.href = '/dashboard/ai/base.php?page_uid=new';
     }
-  }
+  },
 }).mount('#app');
 </script>
 </body>

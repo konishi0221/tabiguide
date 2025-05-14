@@ -1,6 +1,6 @@
 <?php
 require_once dirname(__DIR__) . '/../core/dashboard_head.php';
-require_once dirname(__DIR__) . '/stores/get_stores.php';
+// require_once dirname(__DIR__) . '/stores/get_stores.php';
 
 $facility_uid = $_GET['page_uid'] ?? null;
 
@@ -13,23 +13,37 @@ $stmt = $pdo->prepare("SELECT * FROM stores WHERE facility_uid = :facility_uid O
 $stmt->execute([':facility_uid' => $facility_uid]);
 $stores = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+
 $centerLat = 35.658034;
 $centerLng = 139.701636;
+
+$bucket = getenv('GCS_BUCKET');                // 例: tabiguide_uploads
+foreach ($stores as &$store) {
+    $store['image_url'] =
+        "https://storage.googleapis.com/{$bucket}/stores/{$store['facility_uid']}/{$store['uid']}.png";
+}
+
 
 
 $stmt = $pdo->prepare("SELECT geo_data FROM facility_ai_data WHERE page_uid = :page_uid LIMIT 1");
 $stmt->execute([':page_uid' => $facility_uid]);
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
+$geo_flag = false;
+
 if ($row && !empty($row['geo_data'])) {
     $geo = json_decode($row['geo_data'], true);
     if (!empty($geo['緯度'])) {
         $centerLat = floatval($geo['緯度']);
+        $geo_flag = true;
     }
     if (!empty($geo['経度'])) {
         $centerLng = floatval($geo['経度']);
+        $geo_flag = true;
     }
 }
+
+
 
 function getBaseUrl() {
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https" : "http";
@@ -50,7 +64,7 @@ unset($store); // foreach参照を解放
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>店舗一覧</title>
+    <title>近所の店舗一覧</title>
     <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.prod.js"></script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=<?php echo $GOOGLE_MAPS_API_KEY; ?>&libraries=marker"></script>
     <link rel="stylesheet" href="/assets/css/admin_layout.css">
@@ -186,11 +200,22 @@ unset($store); // foreach参照を解放
     <div id="app">
       <main>
 
-        <h1>店舗一覧</h1>
+        <h1>近所の店舗一覧</h1>
 
         <div id="map" style="width: 100%; height: 500px;"></div>
+        <?php  
+        if ($geo_flag == true ) { ?>
         <a class="create" href="index.php?page_uid=<?= $facility_uid ?>">新規追加</a>
 
+        <?php } else { ?>
+          <p>施設の位置情報が登録されていません。</p>
+        <a class="create"  href="/dashboard/ai/base.php?page_uid=<?= $facility_uid ?>&last_tab=geo_data">位置情報登録ページへ</a>
+        <?php }  ?>
+
+        <!-- <form method="post" action="delete_all_stores.php">
+          <input type="" name="page_uid" value="<?= htmlspecialchars($_GET['page_uid']) ?>" >
+          <button>全削除</button>
+        </form> -->
 
 <!-- <form action="delete_all_stores.php" method="POST" onsubmit="return confirm('本当にすべての店舗を削除しますか？');">
   <input type="hidden" name="page_uid" value="<?= htmlspecialchars($facility_uid) ?>">
@@ -209,8 +234,9 @@ unset($store); // foreach参照を解放
           >
             <div class="icon-circle">
               <img
-                :src="store.has_image ? '/upload/' + store.facility_uid + '/stores/' + store.uid + '.jpg' : '/assets/images/no_image.png'"
-                class="icon"
+                :src="store.image_url + '?t=' + Date.now()"
+                @error="($event)=>{$event.target.src='/assets/images/no_image.png'}"
+              class="icon"
               />
             </div>
             <h3>{{ store.name }}</h3>
@@ -231,14 +257,13 @@ unset($store); // foreach参照を解放
         </div>
       </div>
 
-      <div v-if="stores.length === 0" class="empty-message">
+      <div v-if="stores.length == 0 || $geo_flag" class="empty-message">
         <span class="material-symbols-outlined">storefront</span>
         <p>まだ店舗が登録されていません。</p>
         <p>「新規追加」または「店舗一括作成」から登録してください。</p>
         <form  action="get_stores_complete.php" method="post">
           <button name="page_uid" value="<?= htmlspecialchars($_GET['page_uid']) ?>">店舗一括作成</button>
         </form>
-
       </div>
 
 
@@ -305,14 +330,27 @@ unset($store); // foreach参照を解放
                 });
                 this.addMainMarker()
             },
-            addMarker(store) {
-              lat = Number(store.lat)
-              lng = Number(store.lng)
+            addMarker(store){
+              const lat = Number(store.lat)
+              const lng = Number(store.lng)
 
               const marker = new google.maps.marker.AdvancedMarkerElement({
                 map,
-                position: { lat: lat, lng: lng },
-              });
+                position:{lat,lng}
+              })
+
+              /* クリックでポップアップ */
+              marker.addListener('gmp-click', () => {
+                const html = `
+                  <div>
+                    <strong>${store.name}</strong><br>
+                    <a href="/dashboard/stores/index.php?id=${store.id}&page_uid=${store.facility_uid}" style="border-bottom: solid 1px">
+                      編集ページへ
+                    </a>
+                  </div>`
+                this.infoWindow.setContent(html)
+                this.infoWindow.open({anchor:marker, map:this.map})
+              })
             },
             addMainMarker() {
               const pinScaled = new google.maps.marker.PinElement({

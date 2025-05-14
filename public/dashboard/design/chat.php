@@ -135,17 +135,29 @@ createApp({
     }
   },
   async mounted(){
-    const uid = document.getElementById('chat_setting').dataset.uid
-    const json = await fetch(`/api/chat_setting.php?page_uid=${uid}`).then(r=>r.json())
+    const uid    = document.getElementById('chat_setting').dataset.uid;
+    const res    = await fetch(`/api/chat_setting.php?page_uid=${uid}`);
+    let   json   = {};
+    try {
+      json = await res.clone().json();         // 正常 JSON
+    } catch(e){
+      const txt = await res.text();            // HTML エラーなど
+      console.error('chat_setting api error:', txt);
+    }
 
-    this.type         = json.chat_charactor        || 'ふつうの丁寧語'
-    this.firstMessage = json.chat_first_message   || this.greetings[this.type]
-    this.voiceFirst   = json.voice_first_message  || this.voiceGreetings[this.type]
+    this.type         = json.chat_charactor ?? 'ふつうの丁寧語';
+    this.firstMessage = (json.chat_first_message  ?? this.greetings[this.type]);
+    this.voiceFirst   = (json.voice_first_message ?? this.voiceGreetings[this.type]);
 
-    watch(()=>this.type, nv=>{
-      this.firstMessage = this.greetings[nv]      || ''
-      this.voiceFirst   = this.voiceGreetings[nv] || ''
-    })
+    watch(() => this.type, nv => {
+      // 入力が空、または旧デフォルトのままなら新デフォルトを挿入
+      if (this.firstMessage === '' || this.firstMessage === this.greetings[this.type]) {
+        this.firstMessage = this.greetings[nv] || '';
+      }
+      if (this.voiceFirst === '' || this.voiceFirst === this.voiceGreetings[this.type]) {
+        this.voiceFirst = this.voiceGreetings[nv] || '';
+      }
+    });
   }
 }).mount('#chat_setting')
 </script>

@@ -2,6 +2,7 @@
 require_once dirname(__DIR__, 2) . '/core/dashboard_head.php';
 require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
 require_once dirname(__DIR__, 2) . '/core/prompt_helper.php';
+require_once dirname(__DIR__, 2) . '/core/token_usage.php';
 
 
 use OpenAI\Client as OpenAIClient;
@@ -59,7 +60,7 @@ EOT;
 // API呼び出し
 $client = OpenAI::client($openai_key);
 $response = $client->chat()->create([
-    'model' => 'gpt-4',
+    'model' => 'gpt-4o-mini',
     'messages' => [
         ['role' => 'system', 'content' => 'あなたは宿泊施設構造化AIです。JSON形式で情報を出力します。'],
         ['role' => 'user', 'content' => $systemPrompt],
@@ -67,12 +68,18 @@ $response = $client->chat()->create([
 ]);
 
 $aiContent = $response['choices'][0]['message']['content'] ?? '';
-$parsed = json_decode($aiContent, true);
-//
-// echo "<h2>OpenAIの返却内容（JSONとして処理前）:</h2>";
-// echo "<pre>" . htmlspecialchars($aiContent) . "</pre>";
-// exit;
 
+// -------- コスト計上 --------
+if (isset($response['usage']['prompt_tokens'])) {
+    chargeGPT(
+        $user_uid,
+        'gpt-4o',                           // 料金テーブル上は gpt-4o と同一扱い
+        $response['usage']['prompt_tokens']     ?? 0,
+        $response['usage']['completion_tokens'] ?? 0
+    );
+}
+
+$parsed = json_decode($aiContent, true);
 
 if (!$parsed) {
     header("Location: /dashboard/index.php?error=invalid_json");

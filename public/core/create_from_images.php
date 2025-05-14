@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/dashboard_head.php';
 require_once __DIR__ . '/../vendor/autoload.php';
+require_once dirname(__DIR__) . '/core/token_usage.php';
 
 use OpenAI\Client as OpenAIClient;
 
@@ -36,10 +37,21 @@ function create_from_images(array $encodedImages, string $facility_type, array $
     ];
 
     $response = $client->chat()->create([
-        'model' => 'gpt-4o',
+        'model' => 'gpt-4o-mini',
         'messages' => $messages,
         'temperature' => 0.3,
     ]);
+
+    // --- cost accounting ---------------------------------
+    if (isset($response['usage']['prompt_tokens'])) {
+        chargeGPT(
+            'system',                       // 施設生成は管理タスク扱い
+            'gpt-4o-mini',
+            $response['usage']['prompt_tokens']     ?? 0,
+            $response['usage']['completion_tokens'] ?? 0
+        );
+    }
+    // ------------------------------------------------------
 
     $result = $response['choices'][0]['message']['content'] ?? '';
     return json_encode(extractAndValidateJson($result), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);

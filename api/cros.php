@@ -1,10 +1,14 @@
 <?php
 /* api/chat/cros.php ─ CORS 設定 */
+declare(strict_types=1);
+/* buffer output to avoid "headers already sent" (e.g., BOM issues) */
+ob_start();
 
 $allowed = [
     'http://localhost:5173',
     'https://app.tabiguide.net',
     'https://tabiguide-721ec.web.app',
+    'https://app.tabiguide.net',
 ];
 
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';

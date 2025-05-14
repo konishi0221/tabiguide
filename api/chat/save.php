@@ -15,7 +15,13 @@ function save_unknown(PDO $pdo,string $pageUid, string $userId, string $q, strin
     global $CHAT_PDO;
     $CHAT_PDO->prepare(
         'INSERT INTO question (page_uid,chat_id,question,answer,tags,state)
-         VALUES (:p,:c,:q,"",:t,"new")'
+         VALUES (:p,:c,:q,"",:t,"new")
+         ON DUPLICATE KEY UPDATE
+           chat_id = VALUES(chat_id),
+           answer  = VALUES(answer),
+           tags    = VALUES(tags),
+           state   = VALUES(state),
+           id      = LAST_INSERT_ID(id)'
     )->execute([':p'=>$pageUid, ':c'=>$userId, ':q'=>$q, ':t'=>$tag]);
 }
 
