@@ -25,7 +25,6 @@ function resize_and_encode_images($files): array {
                     'image_url' => ['url' => 'data:image/jpeg;base64,' . $base64]
                 ];
             }
-
         } else {
             $imagick->readImage($tmpPath);
             $imagick->resizeImage(1000, 0, Imagick::FILTER_LANCZOS, 1);

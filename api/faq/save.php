@@ -18,6 +18,9 @@ require_once $root . '/public/core/token_usage.php';
 header('Content-Type: application/json; charset=utf-8');
 
 $req  = json_decode(file_get_contents('php://input'), true) ?? [];
+$mapJson = isset($req['map_json'])
+    ? json_encode($req['map_json'], JSON_UNESCAPED_UNICODE)
+    : null;   // JSON 文字列 or null
 $mode = $req['mode'] ?? '';
 
 $pdo  = require $root . '/public/core/db.php';
@@ -65,15 +68,16 @@ try {
             );
             $pdo->prepare(
                 'INSERT INTO question
-                   (page_uid, question, answer, tags, state, embedding)
+                   (page_uid, type, question, answer, tags, state, embedding, map_json)
                  VALUES
-                   (:u, :q, :a, :t, "draft", :e)'
+                   (:u, "public", :q, :a, :t, "draft", :e, :m)'
             )->execute([
                 ':u' => $req['page_uid'],
                 ':q' => $req['question'],
                 ':a' => $req['answer'] ?? '',
                 ':t' => $req['tags']   ?? '',
-                ':e' => $vec
+                ':e' => $vec,
+                ':m' => $mapJson
             ]);
             echo json_encode(['ok' => true, 'id' => $pdo->lastInsertId()]);
             exit;
@@ -83,23 +87,24 @@ try {
             /* 毎回作り直しても数 ms 程度なのでシンプルに再生成 */
             // 質問と回答を連結して埋め込む
 
-            error_log('save: ' . $req['page_uid'] . '\n' .  $req['question'] );
-
-            $vec = makeEmbedding($req['page_uid'],  $req['question'] . '\n' .  $req['answer']  );
+            $vec = makeEmbedding($req['page_uid'], $req['question'] . "\n" . ($req['answer'] ?? ''));
             $sql = 'UPDATE question
                       SET question = :q,
                           answer   = :a,
                           tags     = :t,
                           embedding= :e,
+                          map_json = :m,
                           state    = CASE WHEN LENGTH(:ans) > 0 THEN "reply" ELSE state END
-                    WHERE id      = :id';
+                    WHERE id = :id AND page_uid = :uid';
             $pdo->prepare($sql)->execute([
                 ':q'   => $req['question'],
                 ':a'   => $req['answer'],
                 ':ans' => $req['answer'],
                 ':t'   => $req['tags'],
                 ':e'   => $vec,
-                ':id'  => $req['id']
+                ':m'   => $mapJson,
+                ':id'  => $req['id'],
+                ':uid' => $req['page_uid'],
             ]);
             echo '{"ok":true}';
             exit;

@@ -6,26 +6,6 @@ class ToolDefinitions
         [
             'type' => 'function',
             'function' => [
-                'name'        => 'getInfo',
-                'description' => '施設 DB から追加情報を取得',
-                'parameters'  => [
-                    'type'       => 'object',
-                    'properties' => [
-                        'slot' => [
-                            'type' => 'string',
-                            'enum' => [
-                                'location','stay','rule',
-                                'amenity','service','contact','nearby_stores'
-                            ]
-                        ]
-                    ],
-                    'required' => ['slot']
-                ]
-            ]
-        ],
-        [
-            'type' => 'function',
-            'function' => [
                 'name'        => 'searchFAQ',
                 'description' => 'FAQ から関連 Q&A を取得',
                 'parameters'  => [

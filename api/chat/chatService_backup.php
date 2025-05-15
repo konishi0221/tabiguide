@@ -60,14 +60,13 @@ class ChatService
         /** ユーザー発言を投げて応答を得る（最小化版） */
         public function ask(string $userMessage): array
         {
-            $mapJson = null;   // ← add to capture map_json if any
-            // error_log($userMessage);
             if ($userMessage === '') {
                 return ['message' => '', 'via_tool' => false];
             }
     
             /* 1) 履歴に user を追加して保存 */
             $hist      = $this->store->load();
+            // error_log('[History before ask] ' . json_encode($hist, JSON_UNESCAPED_UNICODE));
             $hist[]    = ['role' => 'user', 'content' => $userMessage];
             $this->store->save($hist);
             // error_log('[History after user ask] ' . json_encode($hist, JSON_UNESCAPED_UNICODE));
@@ -87,110 +86,35 @@ class ChatService
             /* 5) function-calling ループ */
             $botText = '';
             for ($loop = 0; $loop < 3; $loop++) {
-                // --- ループごとのツール構成 ---
-                $currentTools = ToolDefinitions::TOOLS;
-                if ($loop === 2) {                      // 3 回目は searchFAQ 禁止
-                    $currentTools = array_filter(
-                        ToolDefinitions::TOOLS,
-                        fn($t) => $t['function']['name'] !== 'searchFAQ'
-                    );
-                    // 3 回目は「質問の言い換え」を促す追加 system
-                    $messages[] = [
-                        'role'    => 'system',
-                        'content' => '2 回試して回答できませんでした。キーワードを言い換えてみて、まだ無理なら saveUnknown を呼んでください。'
-                    ];
-                }
                 $msg = $resp['choices'][0]['message'] ?? [];
 
-                /* function_call → OpenAI v1 uses tool_calls */
                 if (isset($msg['tool_calls'][0]['function'])) {
-                    $msg['function_call'] = $msg['tool_calls'][0]['function'];
+                    $msg['function_call'] = $msg['tool_calls'][0]['function'];   // ← 追加
                 }
 
-                /* ── 通常の回答で終了 ── */
+
                 if (!isset($msg['function_call'])) {
                     $botText = $msg['content'] ?? '';
-
-                    // If the assistant responded with minified JSON, parse it
-                    if ($this->isJson($botText)) {
-                        $parsed  = json_decode($botText, true);
-                        $mapJson = $parsed['map_json'] ?? null;
-                        $botText = $parsed['message']  ?? $botText;
-                    } else {
-                        $mapJson = $msg['map_json'] ?? null;   // fallback (should be null)
-                    }
-                    // fallback: detect "text...\n{...}" pattern
-                    if ($mapJson === null && preg_match('/\{.*"map_json".*\}$/s', $botText, $m)) {
-                        $jsonPart = $m[0];
-                        $textPart = substr($botText, 0, -strlen($jsonPart));
-                        if ($this->isJson($jsonPart)) {
-                            $parsed   = json_decode($jsonPart, true);
-                            $mapJson  = $parsed['map_json'] ?? null;
-                            $botText  = trim($textPart);
-                        }
-                    }
                     break;
                 }
-
-                $fnName = $msg['function_call']['name'] ?? '';
-
-                /* ── saveUnknown は終端ツール ── */
-                if ($fnName === 'saveUnknown') {
-                    /* 実行して function メッセージを履歴へ */
-                    $this->handleSaveUnknown($hist, json_decode($msg['function_call']['arguments'] ?? '{}', true));
-                    $messages[] = end($hist);      // 直近 saveUnknown function
-
-                    /* tools なしで最終回答を取得 */
-                    $second = $this->ai->chat($messages, [], ['uid' => $this->pageUid]);
-                    $botText = $second['choices'][0]['message']['content'] ?? '';
-                    if ($this->isJson($botText)) {
-                        $parsed  = json_decode($botText, true);
-                        $mapJson = $parsed['map_json'] ?? null;
-                        $botText = $parsed['message']  ?? $botText;
-                    } else {
-                        $mapJson = $second['choices'][0]['message']['map_json'] ?? null;
-                    }
-                    // fallback: detect "text...\n{...}" pattern for second call
-                    if ($mapJson === null && preg_match('/\{.*"map_json".*\}$/s', $botText, $m)) {
-                        $jsonPart = $m[0];
-                        $textPart = substr($botText, 0, -strlen($jsonPart));
-                        if ($this->isJson($jsonPart)) {
-                            $parsed   = json_decode($jsonPart, true);
-                            $mapJson  = $parsed['map_json'] ?? null;
-                            $botText  = trim($textPart);
-                        }
-                    }
-                    break;
-                }
-
-                /* ── それ以外のツールは通常処理 ── */
                 if ($this->handleCall($hist, $msg) === null) break;
-
-                $messages[] = end($hist);                              // function メッセージ追加
-                $resp       = $this->ai->chat($messages, $currentTools, ['uid' => $this->pageUid]);
+                $messages[] = end($hist);                      // 直前 function
+                $resp       = $this->ai->chat($messages, ToolDefinitions::TOOLS, ['uid' => $this->pageUid]);
             }
             
             /* 6) 最終応答保存 */
-            // if ($botText === '') $botText = '確認しますのでお待ちください。';
-            $hist[] = [
-                'role'    => 'assistant',
-                'content' => $botText,
-                'map_json'=> $mapJson
-            ];
+            if ($botText === '') $botText = '確認しますのでお待ちください。';
+            $hist[] = ['role' => 'assistant', 'content' => $botText];
             $this->store->save($hist);
 
         
             //ログ保存
             $this->logChat($hist);   // ask() の assistant 発話保存直後に呼ぶ            
 
-            // error_log($hist);
-
-
             return [
                 'ctx'     => $this->ctxStore->load(),
                 'message' => $botText,
-                'via_tool'=> true,
-                'map_json'=> $mapJson
+                'via_tool'=> true
             ];
         }
     
@@ -276,15 +200,7 @@ class ChatService
     {
         $kw   = $args['keywords'] ?? '';
         $rows = FaqSearcher::search($this->repo->pdo(), $this->pageUid, $kw);
-
-        // decode map_json string → array for each row
-        foreach ($rows as &$r) {
-            if (isset($r['map_json']) && is_string($r['map_json']) && $this->isJson($r['map_json'])) {
-                $r['map_json'] = json_decode($r['map_json'], true);
-            }
-        }
-        unset($r); // break reference
-
+    
         $json  = json_encode($rows, JSON_UNESCAPED_UNICODE);
         $hist[] = ['role' => 'function', 'name' => 'searchFAQ', 'content' => $json];
         $this->store->save($hist);

@@ -60,6 +60,10 @@ body{
   box-shadow:1px 0 4px rgba(0,0,0,.08)
 }
 
+#app main h1 {
+  font-size: 25px;
+}
+
 a {
   all: unset;        /* 継承も含めて一旦ぜんぶ無効化 */
   cursor: pointer;   /* ポインタ形状だけ戻す（お好みで） */

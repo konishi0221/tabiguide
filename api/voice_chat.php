@@ -23,6 +23,9 @@ header('Content-Type: application/json; charset=utf-8');
 $uid   = $_POST['uid']  ?? '';
 $lang  = $_POST['lang'] ?? 'ja-JP';
 $mode  = $_POST['mode'] ?? 'voice';   // voice | tts
+$userId = $_POST['user_id'] ?? session_id();
+
+// error_log('とどいた ' . $userId);
 
 /* ---------- TTS‑only mode ---------- */
 if ($mode === 'tts') {
@@ -120,7 +123,8 @@ if ($userText === '') {
 /* ---------- 3. GPT Chat (allow tool/function calling) ---------- */
 try {
     // "voice" モードでも通常フローと同じくツール呼び出しを許可
-    $chat = new ChatService($uid, session_id(), 'voice');
+    // use provided userId if available, otherwise fallback to session_id()
+    $chat   = new ChatService($uid, $userId, 'voice');
 
     // ChatService::ask() が自動で tool_choice を決定
     $reply         = $chat->ask($userText);   // returns ['text'=>…] or function call

@@ -40,7 +40,7 @@ class FaqSearcher
         if (!$vec) return null;
         
         $st = $pdo->prepare(
-            'SELECT id,question,answer,tags,embedding
+            'SELECT id,question,answer,tags,map_json,embedding
                FROM question
               WHERE page_uid=? AND state<>"archive"
                 AND LENGTH(TRIM(answer))>0'
@@ -72,7 +72,7 @@ class FaqSearcher
     private static function fulltextSearch(PDO $pdo, string $uid, string $q): ?array
     {
 
-        $sql = 'SELECT id,question,answer,tags,hits
+        $sql = 'SELECT id,question,answer,tags,map_json,hits
                   FROM question
                  WHERE page_uid=:uid AND state<>"archive"
                    AND LENGTH(TRIM(answer))>0

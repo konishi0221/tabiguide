@@ -114,7 +114,7 @@ $page_uid_safe = urlencode($page_uid);
 
 <a href="/dashboard/">
   <h3>
-      <span class="material-symbols-outlined side_icon">home</span>
+      <span class="material-symbols-outlined side_icon">list</span>
       <span class="h3_title">管理中の施設一覧へ</span>
   </h3>
 </a>
@@ -127,24 +127,31 @@ $page_uid_safe = urlencode($page_uid);
   </h3>
 </a>
 
+<h3><span class="material-symbols-outlined side_icon">home</span><span class="h3_title">施設情報</span></h3>
+  <ul>
+    <li><a href="../ai/base.php?page_uid=<?= $page_uid_safe ?>">施設基本情報</a></li>
+    <li><a href="../facility/map.php?page_uid=<?= $page_uid_safe ?>">施設マップ登録</a></li>
+    <!-- <li><a href="../rooms/index.php?page_uid=<?= $page_uid_safe ?>">部屋を作成</a></li> -->
+  </ul>
+
+
+
 
 
   <h3><span class="material-symbols-outlined side_icon">smart_toy</span><span class="h3_title">AIチャット</span></h3>
   <ul>
-    <li><a href="../ai/base.php?page_uid=<?= $page_uid_safe ?>">施設基本情報</a></li>
+    <li><a href="../design/chat.php?page_uid=<?= $page_uid_safe ?>">チャット設定</a></li>
     <li><a href="../chat_log/index.php?page_uid=<?= $page_uid_safe ?>">会話ログ一覧</a></li>
-    <li><a href="../rooms/index.php?page_uid=<?= $page_uid_safe ?>">部屋を作成</a></li>
     <li><a href="../ai/faq.php?page_uid=<?= $page_uid_safe ?>">よくある質問</a></li>
   </ul>
 
-  <h3><span class="material-symbols-outlined side_icon">map</span><span class="h3_title">マップ作成</span></h3>
+  <h3><span class="material-symbols-outlined side_icon">map</span><span class="h3_title">周辺マップ作成</span></h3>
   <ul>
     <li><a href="../stores/list.php?page_uid=<?= $page_uid_safe ?>">近所の店舗一覧</a></li>
   </ul>
 
   <h3><span class="material-symbols-outlined side_icon">palette</span><span class="h3_title">ユーザー画面</span></h3>
   <ul>
-    <li><a href="../design/chat.php?page_uid=<?= $page_uid_safe ?>">チャット設定</a></li>
     <li><a href="../design/design.php?page_uid=<?= $page_uid_safe ?>">デザイン設定</a></li>
   </ul>
 
