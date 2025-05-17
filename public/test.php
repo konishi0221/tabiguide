@@ -1,38 +1,24 @@
+<?php
+/**
+ * test.php
+ * ブラウザでアクセスすると Mailer ラッパーを使って 1 通送信するテストページ。
+ * 例) http://localhost:8080/test.php?to=your@example.com
+ */
 
-ini_set('display_errors', 0);
-set_error_handler(fn($no, $msg, $file, $line) => renderErrorPage($msg, $file, $line));
-set_exception_handler(fn($e) => renderErrorPage($e->getMessage(), $e->getFile(), $e->getLine()));
+declare(strict_types=1);
 
-function renderErrorPage(string $msg, string $file, int $line): void {
-    http_response_code(500);
-    echo <<<HTML
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>エラー</title>
-  <style>
-    html, body { margin:0; padding:0; width:100%; height:100%; }
-    body { display:flex; align-items:center; justify-content:center;
-      background:#2b2b2b; color:#f1f1f1; font-family:sans-serif; }
-    .box { text-align:center; max-width:90%; }
-    h1 { margin-bottom:0.5em; font-size:2em; }
-    p, small { margin:0.2em 0; }
-    small { opacity:0.7; }
-  </style>
-</head>
-<body>
-  <div class="box">
-    <h1>予期せぬエラーが発生しました</h1>
-    <p>メッセージ: {$msg}</p>
-    <small>場所: {$file} (行 {$line})</small>
-  </div>
-</body>
-</html>
-HTML;
+require_once __DIR__ . '/core/mail/mailer.php';
+
+// 宛先 ?to=xxx があれば使用、無ければ SMTP_USER へ
+$to = "konishi0221@gmail.com";
+if (!$to) {
+    echo 'invalid recipient';
     exit;
 }
 
-// テスト用
-// trigger_error("テストエラー", E_USER_ERROR);
-// throw new Exception("テスト例外");
+$subject      = 'Tabiguide メール送信テスト (HTML)';
+$messageHtml  = 'このメールは <strong>HTML 形式</strong> のテスト送信です。';
+
+$ok = Mailer::sendWithTemplate($to, $messageHtml, $subject);
+
+echo $ok ? '✅ 送信成功: ' . htmlspecialchars($to, ENT_QUOTES) : '❌ 送信失敗';

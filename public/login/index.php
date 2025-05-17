@@ -3,6 +3,8 @@ session_start();
 
 $error = $_SESSION['error'] ?? '';
 unset($_SESSION['error']);
+$toastError = $_SESSION['toast_error'] ?? '';
+unset($_SESSION['toast_error']);
 ?>
 
 <!DOCTYPE html>
@@ -16,9 +18,12 @@ unset($_SESSION['error']);
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/login.css">
+  <link rel="stylesheet" href="/assets/css/admin_design.css">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+  <script src="/assets/js/toast.js"></script>
 </head>
 <body>
-  
   <div class="login-container">
     <div class="login-card">
       <div class="logo-container">
@@ -27,9 +32,7 @@ unset($_SESSION['error']);
         </a>
       </div>
       <h1 class="login-title">ログイン</h1>
-      <?php if ($error): ?>
-        <div class="error-message"><?= htmlspecialchars($error) ?></div>
-      <?php endif; ?>
+
       <form action="complete.php" method="post">
         <div class="form-group">
           <label for="email">メールアドレス</label>
@@ -41,10 +44,44 @@ unset($_SESSION['error']);
         </div>
         <button type="submit" class="login-button">ログイン</button>
         <div class="login-links">
-          <a href="register/">アカウントをお持ちでない方</a>
+          <a href="register/">アカウントをお持ちでない方</a><br><br>
+          <a href="resend_verification/">確認メールを再送する</a>
         </div>
       </form>
     </div>
   </div>
 </body>
+<!-- toast for query parameters & session errors -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const q = new URLSearchParams(window.location.search);
+
+  // session-side error message passed from PHP
+  const toastError = <?= json_encode($toastError ?? '') ?>;
+  if (toastError) showToast(toastError, 'error');
+
+  // Registration completed
+  if (q.get('success') === '1') {
+    showToast('仮登録が完了しました。確認メールを確認して登録を完了してください。', 'success');
+  }
+
+  // Verification mail resent
+  if (q.get('resend') === '1') {
+    showToast('確認メールを再送しました。メールをご確認ください。', 'success');
+  }
+
+  // URL-based events
+  if (q.get('account_deleted') === '1') {
+    showToast('アカウントを削除しました。ご利用ありがとうございました。', 'success');
+  }
+
+  if (q.get('email_verification') === '1') {
+    showToast('メールアドレスが確認されました。ログインしてください。', 'success');
+  }
+
+  if (q.get('error') === 'loginFail') {
+    showToast('メールアドレスまたはパスワードが正しくありません。', 'error');
+  }
+});
+</script>
 </html>

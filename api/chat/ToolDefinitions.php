@@ -60,7 +60,7 @@ class ToolDefinitions
                     'properties' => [
                         'name'      => ['type' => 'string','maxLength'=>30],
                         'room_name' => ['type' => 'string','maxLength'=>60],
-                        'stage'     => ['type' => 'string']
+                        'profiling'     => ['type' => 'string','maxLength'=>200]
                     ]
                 ]
             ]

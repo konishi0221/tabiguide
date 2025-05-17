@@ -131,12 +131,9 @@ $page_uid_safe = urlencode($page_uid);
   <ul>
     <li><a href="../ai/base.php?page_uid=<?= $page_uid_safe ?>">施設基本情報</a></li>
     <li><a href="../facility/map.php?page_uid=<?= $page_uid_safe ?>">施設マップ登録</a></li>
-    <!-- <li><a href="../rooms/index.php?page_uid=<?= $page_uid_safe ?>">部屋を作成</a></li> -->
+    <li><a href="../qr/?page_uid=<?= $page_uid_safe ?>">QRコード</a></li>
+    <li><a href="../rooms/index.php?page_uid=<?= $page_uid_safe ?>">部屋を作成</a></li>
   </ul>
-
-
-
-
 
   <h3><span class="material-symbols-outlined side_icon">smart_toy</span><span class="h3_title">AIチャット</span></h3>
   <ul>

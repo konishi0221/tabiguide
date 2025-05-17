@@ -22,6 +22,7 @@ $managers_json = json_decode($row['managers_json'] ?? '[]', true);
   <link rel="stylesheet" href="/assets/css/admin_design.css">
   <script src="/assets/js/vue.global.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="/assets/js/toast.js"></script>
   <style>
 
 label {
@@ -331,6 +332,21 @@ const app = Vue.createApp({
   }
 });
 app.mount('#app');
+</script>
+
+<!-- toast notifications -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const q = new URLSearchParams(window.location.search);
+
+  if (q.get('error') === 'billingExist') {
+    showToast('課金情報が存在するため、この施設は削除できません。', 'error');
+  }
+
+  if (q.get('deleted') === '1') {
+    showToast('施設データを削除しました。', 'success');
+  }
+});
 </script>
 </body>
 </html>

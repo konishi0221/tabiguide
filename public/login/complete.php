@@ -18,7 +18,7 @@ $v->rule('email', 'email');
 if (!$v->validate()) {
     $_SESSION['form_data'] = $data;
     $errors = $v->errors();
-    $_SESSION['form_error'] = array_values($errors)[0][0] ?? 'ログインに失敗しました';
+    $_SESSION['toast_error'] = 'メールアドレスまたはパスワードが正しくありません';
     header('Location: /login/');
     exit;
 }
@@ -28,15 +28,18 @@ $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? LIMIT 1");
 $stmt->execute([$data['email']]);
 $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// var_dump(password_verify($data['password'], $user['password']));
-//
-// // var_dump($user);
-// exit;
-
 
 if (!$user || !password_verify($data['password'], $user['password'])) {
     $_SESSION['form_data'] = $data;
-    $_SESSION['form_error'] = 'メールアドレスまたはパスワードが正しくありません';
+    $_SESSION['toast_error'] = 'メールアドレスまたはパスワードが正しくありません';
+    header('Location: /login/');
+    exit;
+}
+
+// 未確認アカウントはログイン不可
+if ((int)$user['is_verified'] === 0) {
+    $_SESSION['form_data']   = $data;
+    $_SESSION['toast_error'] = 'メールアドレス確認後にログインしてください';
     header('Location: /login/');
     exit;
 }

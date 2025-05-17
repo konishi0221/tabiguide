@@ -13,6 +13,23 @@ $CHAT_PDO = $pdo ?? db();                         // 共通 PDO
 function save_unknown(PDO $pdo,string $pageUid, string $userId, string $q, string $tag=''): void
 {
     global $CHAT_PDO;
+    /* --- 類似質問（80%以上一致）を事前チェック --- */
+    $like = substr($q, 0, 20); // 先頭20文字で簡易比較
+    $stmt = $CHAT_PDO->prepare(
+        'SELECT id,question
+           FROM question
+          WHERE page_uid = :p
+            AND question LIKE :like
+          LIMIT 5'
+    );
+    $stmt->execute([':p'=>$pageUid, ':like'=>"%{$like}%"]);
+    foreach ($stmt->fetchAll(PDO::FETCH_COLUMN|PDO::FETCH_UNIQUE) as $id => $existing) {
+        similar_text($q, $existing, $pct);
+        if ($pct >= 80) {          // 80%以上類似なら保存スキップ
+            return;
+        }
+    }
+    
     $CHAT_PDO->prepare(
         'INSERT INTO question (page_uid,chat_id,question,answer,tags,state)
          VALUES (:p,:c,:q,"",:t,"new")

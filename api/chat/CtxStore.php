@@ -4,9 +4,9 @@ class CtxStore
     /** デフォルトコンテキスト */
     private const DEFAULT_CTX = [
         'lang'      => '',
-        'room_id'   => null,
-        'guest_num' => 0,
-        'profile'   => '',          // ゲスト人物像（エイリアス）
+        'room_name'   => null,
+        'room_uid'   => null,
+        'stage' => null,
         'profiling' => ''           // ゲスト人物像（200文字以内）
     ];
 
@@ -52,5 +52,10 @@ class CtxStore
     public function saveProfile(string $profile): void
     {
         $this->saveProfiling($profile);
+    }
+    /** ctx を丸ごと削除（セッションから除去） */
+    public function clear(): void
+    {
+        unset($_SESSION[$this->key]);
     }
 }

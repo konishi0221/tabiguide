@@ -19,9 +19,9 @@ if ($page_uid) {
 <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue@3.2.47/dist/vue.global.prod.js"></script>
 <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<script src="/assets/js/toast.js"></script>
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 
 <div class="dashboard-header" id="header">
 
@@ -60,3 +60,25 @@ if ($page_uid) {
   </div>
 </div>
 <div class="header_padding"></div>
+<!-- <script>
+// --- Toast util ---
+function showToast(msg){
+  const el = document.createElement('div');
+  el.className = 'copy-toast';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  requestAnimationFrame(()=> el.classList.add('show'));
+  setTimeout(()=>{
+    el.classList.remove('show');
+    setTimeout(()=> el.remove(), 400);
+  }, 1500);
+}
+
+// auto-toast when ?success=1
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('success') === '1') {
+    showToast('保存しました');
+  }
+});
+</script> -->

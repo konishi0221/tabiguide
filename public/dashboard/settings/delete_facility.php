@@ -22,12 +22,26 @@ if (!$facility) {
     die('施設が見つかりません');
 }
 
+// 課金レコード（キャンセル以外）が残っていないか確認
+$billingStmt = $pdo->prepare("SELECT COUNT(*) FROM billing WHERE page_uid = ? AND status <> 'canceled'");
+$billingStmt->execute([$page_uid]);
+$activeBilling = (int)$billingStmt->fetchColumn();
+
+if ($activeBilling > 0) {
+    // 有効な課金があるので削除不可
+    header("Location: /dashboard/settings/index.php?page_uid=" . urlencode($page_uid) . "&error=billingExist");
+    exit;
+}
+
 // 関連データ削除
 $tables = [
     'stores' => 'facility_uid',
     'question' => 'page_uid',
     'chat_log' => 'page_uid',
     'design' => 'page_uid',
+    'rooms' => 'page_uid',
+    'staff_requests' => 'page_uid',
+    'token_usage' => 'page_uid',
     'facility_ai_data' => 'page_uid'
 ];
 

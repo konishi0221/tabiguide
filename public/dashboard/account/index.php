@@ -72,6 +72,28 @@ $user = $_SESSION['user'];
   .account-container button:hover {
     background: #0069d9;
   }
+  .account-container button[style*="background:#dc3545"]{
+    background:#dc3545;
+  }
+  .account-container button[style*="background:#dc3545"]:hover{
+    background:#c82333;
+  }
+  .button-row{
+    display:flex;
+    justify-content:space-between; /* 左端:保存  右端:削除 */
+    gap:16px;
+    margin-top:32px;
+  }
+
+  .account-container button.delete-btn{
+    background:white;
+    color:#6b6b6b;
+    border:1px solid #6b6b6b;
+  }
+  .account-container button.delete-btn:hover{
+    opacity: 0.8;
+    /* background:rgba(220,53,69,0.08); */
+  }
 
   </style>
 </head>
@@ -85,7 +107,6 @@ $user = $_SESSION['user'];
       <div class="account-container">
         <h2>アカウント情報の編集</h2>
 
-        <form method="POST" action="/dashboard/account/save_user.php" enctype="multipart/form-data">
           <label>アイコン画像</label>
           <img :src="user.iconPreview || user.icon" class="icon-preview" alt="アイコン">
           <input type="file" name="icon" @change="handleIconChange">
@@ -96,10 +117,17 @@ $user = $_SESSION['user'];
           <label>メールアドレス</label>
           <input type="email" name="email" v-model="user.email">
 
-          <button type="submit">保存する</button>
-        </form>
+      <div class="button-row">
+        <button type="submit">保存する</button>
+
+        <button type="submit"
+                formaction="/dashboard/account/delete.php"
+                formmethod="POST"
+                onclick="return confirm('本当にアカウントを削除しますか？ この操作は取り消せません。');"
+                class="delete-btn">アカウントを削除する</button>
       </div>
     </form>
+      </div>
   <!-- </main> -->
 </div>
 
@@ -129,6 +157,14 @@ createApp({
       }
     }
 }).mount('#app');
+</script>
+<!-- facilityExist toast -->
+<script>
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('error') === 'facilityExist') {
+    const msg = '施設に関連するデータがあるため、このアカウントは削除できません。全ての施設を削除してください。';
+    showToast(msg, 'error');    
+  }
 </script>
 </body>
 </html>

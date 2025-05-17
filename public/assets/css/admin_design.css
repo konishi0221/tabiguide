@@ -57,7 +57,9 @@ body{
   background:#fff;
   padding:20px;
   box-sizing:border-box;
-  box-shadow:1px 0 4px rgba(0,0,0,.08)
+  box-shadow:1px 0 4px rgba(0,0,0,.08);
+  border-radius: 8px;
+  border:solid 1px #dcdcdc;
 }
 
 #app main h1 {
@@ -450,4 +452,60 @@ label,.setting-section label,.form-section label{font-weight:600;margin-bottom:6
 
 .none {
   display: none
+}
+
+
+.copy-toast{
+  position:fixed;
+  /* top は JS で inline 指定してスタックさせる */
+  right:24px;
+  background:var(--primary);
+  padding:8px 16px;
+  color:#fff;
+  border-radius:4px;
+  font-size:14px;
+  z-index:9999;
+  opacity:0;
+  transition:opacity .3s;
+  /* pointer-events:none;   クリック透過 */
+}
+.copy-toast.error{
+  background:#dc3545;
+}
+.copy-toast .material-symbols-outlined{
+  font-size:20px;
+  vertical-align:middle;
+  color: white;
+}
+.copy-toast.show{ opacity:1; }
+@media print{ .copy-toast{ display:none } }
+
+/* Added flex styles for copy-toast and children */
+.copy-toast{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.copy-toast .msg{
+  margin-left:8px;
+  text-decoration:none;
+  color:#fff;
+}
+.copy-toast .msg{
+  cursor:default;
+}
+.copy-toast a.msg{
+  cursor:pointer;
+}
+.copy-toast .msg:hover{
+  text-decoration:none;
+}
+.copy-toast .close-btn{
+  margin-left:auto;
+  cursor:pointer;
+}
+
+.copy-toast .close-btn,
+.copy-toast .msg{
+  pointer-events:auto;
 }

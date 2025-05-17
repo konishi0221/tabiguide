@@ -167,3 +167,87 @@
 .modal-body button {
   margin-left: 8px;
 }
+
+/* === map modal improved === */
+.map-modal{
+  max-width:800px;
+  padding:12px 16px;
+}
+.map-preview{
+  position:relative;
+  border:1px solid #ccc;
+  margin:12px auto;
+  width:100%;
+  max-width:740px;
+  overflow:hidden;
+}
+
+.pin{
+  position:absolute;
+  width:14px;
+  height:14px;
+  border-radius:50%;
+  background:#ff3b30;
+  cursor:pointer;
+  transition:background 0.2s;
+  pointer-events:auto;
+  transform:translate(-50%,-50%) scale(var(--pin-scale,1));
+  transform-origin:center;
+}
+.pin:hover{
+  background:#ff795d;
+}
+.pos-btn{
+  margin-top:6px;
+  padding:4px 10px;
+  font-size:0.8rem;
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  cursor:pointer;
+}
+.btn-row{
+  display:flex;
+  justify-content:flex-end;
+  gap:12px;
+  margin-top:12px;
+}
+.zoom-wrap{
+  position:relative;
+  width:100%;
+  height:auto;
+  touch-action:none;         /* allow pinch-zoom in mobile */
+}
+.zoom-wrap img{
+  width:100%;
+  height:auto;
+  display:block;
+}
+.icon-map{
+  font-size:18px;
+  color:#2196f3;
+  vertical-align:middle;
+  margin-right:4px;
+}
+/* --- FAQ search box --- */
+.faq-search{
+  width:100%;
+  max-width:400px;
+  padding:6px 10px;
+  margin:12px 0 16px;
+  font-size:1rem;
+  border:1px solid #ccc;
+  border-radius:4px;
+}
+.search-btn{
+  background:none;
+  border:none;
+  cursor:pointer;
+  vertical-align:middle;
+  margin-left:6px;
+  font-size:28px;
+  color:#555;
+}
+.search-btn:hover{
+  color:#000;
+}

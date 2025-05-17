@@ -24,67 +24,6 @@ $faqList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </style>
 <style>
-/* === map modal improved === */
-.map-modal{
-  max-width:800px;
-  padding:12px 16px;
-}
-.map-preview{
-  position:relative;
-  border:1px solid #ccc;
-  margin:12px auto;
-  width:100%;
-  max-width:740px;
-  overflow:hidden;
-}
-
-.pin{
-  position:absolute;
-  width:14px;
-  height:14px;
-  border-radius:50%;
-  background:#ff3b30;
-  cursor:pointer;
-  transition:background 0.2s;
-  pointer-events:auto;
-  transform:translate(-50%,-50%) scale(var(--pin-scale,1));
-  transform-origin:center;
-}
-.pin:hover{
-  background:#ff795d;
-}
-.pos-btn{
-  margin-top:6px;
-  padding:4px 10px;
-  font-size:0.8rem;
-  display:inline-flex;
-  align-items:center;
-  gap:4px;
-  cursor:pointer;
-}
-.btn-row{
-  display:flex;
-  justify-content:flex-end;
-  gap:12px;
-  margin-top:12px;
-}
-.zoom-wrap{
-  position:relative;
-  width:100%;
-  height:auto;
-  touch-action:none;         /* allow pinch-zoom in mobile */
-}
-.zoom-wrap img{
-  width:100%;
-  height:auto;
-  display:block;
-}
-.icon-map{
-  font-size:18px;
-  color:#2196f3;
-  vertical-align:middle;
-  margin-right:4px;
-}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/panzoom@9.4.0/dist/panzoom.min.js"></script>
@@ -95,7 +34,18 @@ $faqList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <?php include dirname(__DIR__) . '/components/side_navi.php'; ?>
 <div id="app" class="container">
 <main>
-<h1>ゲストからの質問・学習情報</h1>
+<h1>ゲストからの質問・学習情報
+  <button class="search-btn" @click="toggleSearch">
+    <span class="material-icons">search</span>
+  </button>
+</h1>
+
+<input v-if="searchVisible"
+       type="text"
+       v-model="search"
+       placeholder="キーワード検索..."
+       class="faq-search"
+       ref="searchInput">
 
 <div class="tab-nav">
   <button v-for="t in tabs" :key="t.key"
@@ -111,9 +61,7 @@ $faqList = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <h3>新しい学習情報を追加</h3>
     <textarea rows="4" v-model="newForm.question" placeholder="質問を入力..."></textarea>
     <textarea rows="4" v-model="newForm.answer"   placeholder="回答（空でも可）"></textarea>
-    <button class="pos-btn" @click.stop="openMap('new')">
-      <span class="material-icons">place</span> 位置情報
-    </button>
+    <button class="pos-btn" @click.stop="openMap('new')"><span class="material-icons">place</span> 位置情報</button>
     <div class="btn-row">
       <button @click="closeNew">キャンセル</button>
       <button @click="createNew">保存</button>
@@ -165,7 +113,8 @@ $faqList = $stmt->fetchAll(PDO::FETCH_ASSOC);
               v-model="f.editAnswer" placeholder="脱衣所の引き出しにあります。"></textarea>
     <!-- map pin button -->
     <button v-if="f.editing" class="pos-btn" @click.stop="openMap(f)">
-      <span class="material-icons">place</span> 位置情報
+      <span class="material-icons">place</span>
+      位置情報<span v-if="f.map_json && f.map_json.pins && f.map_json.pins.length">({{f.map_json.pins.length}})</span>
     </button>
 
 
@@ -235,6 +184,8 @@ createApp({
       });
     });
     return{
+      search:'',
+      searchVisible:false,
       list:raw,
       active:'new',
       tabs:[
@@ -269,6 +220,15 @@ createApp({
         a = a.filter(v => v.state === 'archive');
       }
 
+      // --- keyword search ---
+      if (this.search.trim() !== '') {
+        const kw = this.search.trim().toLowerCase();
+        a = a.filter(v =>
+          (v.question && v.question.toLowerCase().includes(kw)) ||
+          (v.answer   && v.answer.toLowerCase().includes(kw))
+        );
+      }
+
       return _.orderBy(
         a,
         ['pinned', 'updated_at', 'hits', 'id'],
@@ -278,6 +238,17 @@ createApp({
   },
 
   methods:{
+    /* 検索ボックスの表示切替 */
+    toggleSearch(){
+      this.searchVisible = !this.searchVisible;
+      if(this.searchVisible){
+        this.$nextTick(()=>{
+          this.$refs.searchInput && this.$refs.searchInput.focus();
+        });
+      }else{
+        this.search = '';           // 閉じる時に入力をクリア（任意）
+      }
+    },
     /* 編集開始 */
     startEdit(f){
       console.log('[startEdit]', f.id);

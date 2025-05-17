@@ -10,6 +10,17 @@ RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS \
   && docker-php-ext-install -j$(nproc) gd pdo_mysql \
   && apk del .build-deps   # ビルド専用パッケージ削除
 
+# ── Imagick を追加 ──
+RUN apk add --no-cache imagemagick imagemagick-dev \
+  && pecl install imagick \
+  && docker-php-ext-enable imagick
+
+# ── Redis セッションハンドラ ──
+RUN pecl install redis \
+  && docker-php-ext-enable redis \
+  && echo "session.save_handler=redis"                >  /usr/local/etc/php/conf.d/zzz-redis.ini \
+  && echo 'session.save_path="tcp://${REDIS_HOST}:6379"' >> /usr/local/etc/php/conf.d/zzz-redis.ini
+
 WORKDIR /workspace
 COPY . .  
 

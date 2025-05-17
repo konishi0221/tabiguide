@@ -1,5 +1,6 @@
 <?php
-require_once '../../db.php';
+session_start();
+require_once dirname(__DIR__) . '/../core/db.php';
 
 $token = $_GET['token'] ?? '';
 
@@ -20,7 +21,7 @@ try {
     }
 
     if ((int)$user['is_verified'] === 1) {
-        echo '✅ すでに認証済みです。';
+        echo '❌ 無効なトークンです。';
         exit;
     }
 
@@ -28,7 +29,9 @@ try {
     $stmt = $pdo->prepare("UPDATE users SET is_verified = 1, email_verification_token = NULL WHERE id = ?");
     $stmt->execute([$user['id']]);
 
-    echo '✅ メールアドレスの確認が完了しました。ログインできます！';
+    // 成功したらログインページへリダイレクト
+    header('Location: /login/?email_verification=1');
+    exit;
 
 } catch (PDOException $e) {
     echo '❌ エラーが発生しました: ' . htmlspecialchars($e->getMessage());
